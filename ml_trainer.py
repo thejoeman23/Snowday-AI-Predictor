@@ -41,6 +41,19 @@ def Train(data):
     print(f"Predicted {tp}/{tp + fn} snow days")
     print()
 
+def PrintFeatureImportance():
+    importances = MODEL.feature_importances_
+
+    features = TRAINING_DATA.drop(columns=["date", "snow_day"]).columns
+    importance_df = pd.DataFrame({
+        "feature": features,
+        "importance": importances
+    }).sort_values(by="importance", ascending=False)
+
+    print("\nTOP FACTORS THE MODEL USES:")
+    for _, row in importance_df.head(8).iterrows():
+        print(f"- {row['feature']}")
+
 
 def Test(data):
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
@@ -60,8 +73,11 @@ def Test(data):
 
 # ---------------- RUN ----------------
 TRAINING_DATA = pd.read_csv("snowday_dataset.csv")
+TESTING_DATA = pd.read_csv("last_week.csv")
 
 Train(TRAINING_DATA)
+Test(TESTING_DATA)
+PrintFeatureImportance()
 
 # Example usage later:
 # TEST_DATA = pd.read_csv("last_week.csv")
