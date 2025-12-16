@@ -1,4 +1,5 @@
 import pandas as pd
+import pickle
 import weather_fetcher as weather
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
@@ -48,6 +49,8 @@ def Train(data):
 
     MODEL = grid.best_estimator_
 
+    with open("app/model.pkl", "wb") as f:  # <- save to a folder your server can access
+        pickle.dump(MODEL, f)
     print("BEST MODEL SETTINGS:")
     print(grid.best_params_)
     print()
@@ -99,8 +102,8 @@ def Test(data):
 # ---------------- RUN ----------------
 
 TRAINING_DATA = pd.read_csv("Data/training_dataset.csv")
-#TESTING_DATA = weather.get_last_weeks_data()
+TESTING_DATA = weather.get_tomorrows_data()
 
 Train(TRAINING_DATA)
 #PrintFeatureImportance()
-#Test(TESTING_DATA)
+Test(TESTING_DATA)

@@ -173,6 +173,11 @@ def get_todays_data() -> pd.DataFrame:
     today_str = datetime.today().strftime("%Y-%m-%d")
     return get_data_within_timerange(today_str, today_str, use_forecast=True)
 
+def get_tomorrows_data() -> pd.DataFrame:
+    """Fetch weather data for tomorrow."""
+    tomorrow_str = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+    return get_data_within_timerange(tomorrow_str, tomorrow_str, use_forecast=True)
+
 
 def save_to_file(data: pd.DataFrame, filename: str):
     """Save DataFrame to CSV."""
