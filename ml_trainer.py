@@ -94,8 +94,7 @@ def Test(data):
     for _, row in results.iterrows():
         weekday = pd.to_datetime(row["date"]).day_name()
         odds = row["snow_day_probability"] * 100
-        print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day")
-
+        print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day (so {"yes" if odds > 50 else "no"}")
 
 # ---------------- RUN ----------------
 TRAINING_DATA = pd.read_csv("snowday_dataset.csv")
