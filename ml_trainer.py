@@ -1,23 +1,20 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import weather_fetcher as weather
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 # ---------------- CONFIG ----------------
 
-BRAIN_CELLS = 500
+BRAIN_CELLS = 100
 SEED = 42
-TEST_SIZE = 0.5
-
-MODEL = RandomForestClassifier(
-    n_estimators=BRAIN_CELLS,
-    random_state=SEED
-)
+TEST_SIZE = 0.7
 
 # ----------------------------------------
 
-
 def Train(data):
+    global MODEL
+
     x = data.drop(columns=["date", "snow_day"])
     y = data["snow_day"]
 
@@ -27,7 +24,35 @@ def Train(data):
         random_state=SEED
     )
 
-    MODEL.fit(x_train, y_train)
+    # 🔍 GRID SEARCH
+    param_grid = {
+        "n_estimators": [100, 300, 500],
+        "max_depth": [None, 6, 10, 15],
+        "min_samples_split": [2, 5, 10],
+        "class_weight": ["balanced"]
+    }
+
+    base_model = RandomForestClassifier(
+        random_state=SEED
+    )
+
+    grid = GridSearchCV(
+        base_model,
+        param_grid,
+        cv=5,
+        scoring="recall",   # snow days matter more
+        n_jobs=-1
+    )
+
+    grid.fit(x_train, y_train)
+
+    MODEL = grid.best_estimator_
+
+    print("BEST MODEL SETTINGS:")
+    print(grid.best_params_)
+    print()
+
+    # ---------------- EVALUATION ----------------
 
     y_pred = MODEL.predict(x_test)
 
@@ -40,6 +65,7 @@ def Train(data):
     print(f"Predicted {tn}/{tn + fp} non-snow days")
     print(f"Predicted {tp}/{tp + fn} snow days")
     print()
+
 
 def PrintFeatureImportance():
     importances = MODEL.feature_importances_
@@ -73,12 +99,8 @@ def Test(data):
 
 # ---------------- RUN ----------------
 TRAINING_DATA = pd.read_csv("snowday_dataset.csv")
-TESTING_DATA = pd.read_csv("last_week.csv")
+TESTING_DATA = weather.get_data_within_timerange("2025-11-25", "2025-12-15")
 
 Train(TRAINING_DATA)
+#PrintFeatureImportance()
 Test(TESTING_DATA)
-PrintFeatureImportance()
-
-# Example usage later:
-# TEST_DATA = pd.read_csv("last_week.csv")
-# Test(TEST_DATA)
