@@ -1,21 +1,24 @@
 from fastapi import FastAPI
-import pandas as pd
-import weather_fetcher
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+
 import pickle
+import weather_fetcher
+import pandas as pd
 
 app = FastAPI()
+templates = Jinja2Templates(directory="app/templates")
 
-# Load the trained model once when the server starts
+# Load model
 with open("app/model.pkl", "rb") as f:
     MODEL = pickle.load(f)
 
-
-@app.get("/")
-def predict():
-    # Get tomorrow's weather
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    # Get prediction data
     data = weather_fetcher.get_tomorrows_data()
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
-
     probs = MODEL.predict_proba(X)[:, 1]
     data["snow_day_probability"] = probs
 
@@ -30,4 +33,5 @@ def predict():
             "prediction": "yes" if odds > 50 else "no"
         })
 
-    return results
+    # Render HTML template
+    return templates.TemplateResponse("index.html", {"request": request, "data": results})

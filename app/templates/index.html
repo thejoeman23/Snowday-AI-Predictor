@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Snow Day Predictor</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+  <h1 align="centre">Snow Day Predictions</h1>
+  <table id="predictions">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Weekday</th>
+        <th>Probability (%)</th>
+        <th>Prediction</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadPredictions() {
+      const response = await fetch('/'); // or '/predict' if you keep that route
+      const data = await response.json();
+
+      const tbody = document.querySelector('#predictions tbody');
+      tbody.innerHTML = ''; // clear existing rows
+
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.date}</td>
+          <td>${item.weekday}</td>
+          <td>${item.snow_day_probability.toFixed(1)}</td>
+          <td>${item.prediction}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    loadPredictions();
+  </script>
+</body>
+</html>
