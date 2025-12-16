@@ -66,7 +66,6 @@ def Train(data):
     print(f"Predicted {tp}/{tp + fn} snow days")
     print()
 
-
 def PrintFeatureImportance():
     importances = MODEL.feature_importances_
 
@@ -79,7 +78,6 @@ def PrintFeatureImportance():
     print("\nTOP FACTORS THE MODEL USES:")
     for _, row in importance_df.head(8).iterrows():
         print(f"- {row['feature']}")
-
 
 def Test(data):
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
@@ -99,7 +97,8 @@ def Test(data):
         print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day (so {"yes" if odds > 50 else "no"})")
 
 # ---------------- RUN ----------------
-TRAINING_DATA = pd.read_csv("training_dataset.csv")
+
+TRAINING_DATA = pd.read_csv("Data/training_dataset.csv")
 #TESTING_DATA = weather.get_last_weeks_data()
 
 Train(TRAINING_DATA)

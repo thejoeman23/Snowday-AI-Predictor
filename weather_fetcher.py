@@ -8,7 +8,7 @@ from numpy.ma.extras import average
 LATITUDE = 44.56
 LONGITUDE = -81.98
 
-SNOW_DAYS = pd.read_csv("snow_day_dates.csv")
+SNOW_DAYS = pd.read_csv("Data/snow_day_dates.csv")
 
 # ----------------------------------------
 
@@ -38,7 +38,6 @@ def fetch_weather(date_str: str, use_forecast: bool = False) -> dict:
 
     r = requests.get(url, params=params)
     return r.json()
-
 
 def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool = False) -> pd.DataFrame:
     """Fetch weather data for all weekdays in a date range."""
@@ -134,7 +133,6 @@ def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool
 
     return pd.DataFrame(rows)
 
-
 def get_last_weeks_data(use_forecast: bool = False) -> pd.DataFrame:
     """Fetch weather data for last week (Mon–Fri)."""
     today = datetime.today()
@@ -156,7 +154,6 @@ def get_this_weeks_data() -> pd.DataFrame:
         friday.strftime("%Y-%m-%d"),
         use_forecast=True
     )
-
 
 def get_next_weeks_data() -> pd.DataFrame:
     """Fetch weather data for next week (Monday to Friday)."""
