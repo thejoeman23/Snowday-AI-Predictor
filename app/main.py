@@ -10,7 +10,7 @@ with open("app/model.pkl", "rb") as f:
     MODEL = pickle.load(f)
 
 
-@app.get("/predict")
+@app.get("/")
 def predict():
     # Get tomorrow's weather
     data = weather_fetcher.get_tomorrows_data()
