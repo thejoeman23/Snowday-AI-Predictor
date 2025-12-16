@@ -28,7 +28,8 @@ def fetch_weather(date_str: str, use_forecast: bool = False) -> dict:
         "hourly": [
             "temperature_2m",
             "snowfall",
-            "windspeed_10m"
+            "windspeed_10m",
+            "dewpoint_2m"
         ],
         "start_date": date_str,
         "end_date": date_str,
@@ -66,27 +67,66 @@ def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool
             if v is not None
         ]
 
+        dewpoint = [
+            v for v in hourly["dewpoint_2m"][:8]
+            if v is not None
+        ]
+
+        snowfall_overnight = sum(
+            v if v is not None else 0
+            for v in hourly["snowfall"][:8]
+        )
+
+        snowfall_24h = sum(
+            v if v is not None else 0
+            for v in hourly["snowfall"][:24]
+        )
+
         row = {
             "date": date_str,
             "snow_day": int((SNOW_DAYS["date"].astype(str) == date_str).any()),
-            "snowfall_overnight": sum(hourly["snowfall"][0:7]),
-            "snowfall_24h": sum(
-                v if v is not None else 0
-                for v in hourly["snowfall"][:24]
+
+            "snowfall_overnight": snowfall_overnight,
+            "snowfall_24h": snowfall_24h,
+
+            "no_snowfall_penalty": (
+                2 if snowfall_24h == 0
+                else 1 if snowfall_overnight < 1
+                else 0
             ),
-            "no_snowfall_penalty": 1 if sum(hourly["snowfall"][0:7]) < .5 else 0,
-            "temp_min_overnight": min(hourly["temperature_2m"][0:7]),
+
+            "temp_min_overnight": min(
+                v for v in hourly["temperature_2m"][:8]
+                if v is not None
+            ),
+
             "windspeed_avg_overnight": (
                 sum(overnight_wind) / len(overnight_wind)
                 if overnight_wind else 0
             ),
+
+            "dewpoint_avg_overnight": (
+                sum(dewpoint) / len(dewpoint)
+                if dewpoint else 0
+            )
         }
 
-        for h in range(8):  # hours 0–7
-            row[f"temperature{h}"] = hourly["temperature_2m"][h] or 0
-            row[f"snowfall{h}"] = hourly["snowfall"][h] or 0
-            row[f"windspeed{h}"] = hourly["windspeed_10m"][h] or 0
-
+        for h in range(8):
+            row[f"temperature{h}"] = (
+                hourly["temperature_2m"][h]
+                if hourly["temperature_2m"][h] is not None
+                else 0
+            )
+            row[f"snowfall{h}"] = (
+                hourly["snowfall"][h]
+                if hourly["snowfall"][h] is not None
+                else 0
+            )
+            row[f"windspeed{h}"] = (
+                hourly["windspeed_10m"][h]
+                if hourly["windspeed_10m"][h] is not None
+                else 0
+            )
 
         rows.append(row)
         current += timedelta(days=1)
@@ -143,4 +183,4 @@ def save_to_file(data: pd.DataFrame, filename: str):
     print(f"Saved {len(data)} rows to {filename}")
 
 #data = get_data_within_timerange("2024-11-01", "2025-04-30")
-#save_to_file(data, "snowday_dataset.csv")
+#save_to_file(data, "training_dataset.csv")

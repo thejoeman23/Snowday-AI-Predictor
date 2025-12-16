@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 
 BRAIN_CELLS = 100
 SEED = 42
-TEST_SIZE = 0.7
+TEST_SIZE = 0.8
 
 # ----------------------------------------
 
@@ -93,13 +93,15 @@ def Test(data):
 
     for _, row in results.iterrows():
         weekday = pd.to_datetime(row["date"]).day_name()
-        odds = row["snow_day_probability"] * 100
-        print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day (so {"yes" if odds > 50 else "no"}")
+        odds = (
+            row["snow_day_probability"] * 100 if row["snowfall_24h"] != 0 else 0.01
+        )
+        print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day (so {"yes" if odds > 50 else "no"})")
 
 # ---------------- RUN ----------------
-TRAINING_DATA = pd.read_csv("snowday_dataset.csv")
-TESTING_DATA = weather.get_data_within_timerange("2025-11-25", "2025-12-15")
+TRAINING_DATA = pd.read_csv("training_dataset.csv")
+#TESTING_DATA = weather.get_last_weeks_data()
 
 Train(TRAINING_DATA)
 #PrintFeatureImportance()
-Test(TESTING_DATA)
+#Test(TESTING_DATA)
