@@ -5,6 +5,7 @@
   --text-white: #ffffff;
   --text-muted: #636363;
   --accent: #59A6F7;
+  --accent-pink: #e673c6;
 
   /* FONT SIZE TOKENS */
   --fs-location-min: 16px;
@@ -92,17 +93,6 @@ body {
   position: relative;
 }
 
-/* DIVIDER */
-
-.line {
-  width: 100%;
-  max-width: 690px;
-  height: 5px;
-  background: var(--accent);
-  margin: 0 auto;
-  border-radius: 10px;
-}
-
 /* TOMORROW */
 
 .current {
@@ -147,12 +137,50 @@ body {
   text-align: center;
 }
 
+/* DIVIDER */
+
+.line {
+  width: 100%;
+  max-width: 690px;
+  height: 5px;
+
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent-pink) 50%,
+    var(--accent) 100%
+  );
+  background-size: 200% 100%;
+  animation: slideDivider 3s linear infinite;
+
+  margin: 0 auto;
+  border-radius: 10px;
+}
+
+@keyframes slideDivider {
+  0%   { background-position: 0% center; }
+  100% { background-position: -200% center; }
+}
+
+.forecast-label {
+  font-size: clamp(var(--fs-metric-label-min), 3vw, var(--fs-metric-label-max));
+  font-weight: 700;
+  background: var(--text-white);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.04em;
+  text-align: center;
+  margin-top: -15px;
+}
+
 /* METRICS */
 
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(12px, 3vw, 18px);
+  margin-top: -25px;
 }
 
 .metric {
