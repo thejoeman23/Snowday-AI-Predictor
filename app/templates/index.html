@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=1200" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Snow Day Predictor</title>
 
   <!-- Inter Variable -->
@@ -11,7 +11,7 @@
     href="https://rsms.me/inter/inter.css"
   />
 
-  <link rel="stylesheet" href="../static/style.css" />
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <main class="page">
@@ -55,26 +55,23 @@
     </section>
   </main>
 
-<script>  
+<script>
   function updateProbabilities(list) {
-    // Tomorrow section = first item
     document.querySelector(".current-percent").textContent =
       list[0].snow_day_probability + "%";
     document.querySelector(".current-label").textContent =
-      list[0].weekday
-    
-    // Metrics section = remaining 4 items
+      list[0].weekday;
+
     const metricValues = document.querySelectorAll(".metric-value");
     const metricLabels = document.querySelectorAll(".metric-label");
-    
-    for (let i = 1; i < metricValues.length; i++) {
-      metricValues[i].textContent =
-        list[i].snow_day_probability + "%";
-      metricLabels[i].textContent =
-        list[i].weekday;
+
+    for (let i = 1; i < list.length; i++) {
+      metricValues[i - 1].textContent = list[i].snow_day_probability + "%";
+      metricLabels[i - 1].textContent = list[i].weekday;
     }
   }
 
+  const results = JSON.parse(`{{ data | tojson | safe }}`);
   updateProbabilities(results);
 </script>
 
