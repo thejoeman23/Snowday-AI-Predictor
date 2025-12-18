@@ -1,51 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
   <title>Snow Day Predictor</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; }
-    h1 { color: #333; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #eee; }
-  </style>
+
+  <!-- Inter Variable -->
+  <link
+    rel="stylesheet"
+    href="https://rsms.me/inter/inter.css"
+  />
+
+  <link rel="stylesheet" href="../static/style.css" />
 </head>
 <body>
-  <h1 align="centre">Snow Day Predictions</h1>
-  <table id="predictions">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Weekday</th>
-        <th>Probability (%)</th>
-        <th>Prediction</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <main class="page">
+    <header class="header">
+      <h1 class="location">Owen Sound</h1>
+      <h2 class="title">Snow Day Predictor.</h2>
+      <p class="subtitle">Hoping for a snow day?</p>
+    </header>
 
-  <script>
-    async function loadPredictions() {
-      const response = await fetch('/'); // or '/predict' if you keep that route
-      const data = await response.json();
+    <section class="card">
+      <!-- Top -->
+      <div class="current">
+        <div class="current-percent">18%</div>
+        <div class="current-label">Tomorrow</div>
+      </div>
 
-      const tbody = document.querySelector('#predictions tbody');
-      tbody.innerHTML = ''; // clear existing rows
+      <div>
+        <section class="line">
+        </section>
+      </div>
 
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.date}</td>
-          <td>${item.weekday}</td>
-          <td>${item.snow_day_probability.toFixed(1)}</td>
-          <td>${item.prediction}</td>
-        `;
-        tbody.appendChild(row);
-      });
+      <!-- Bottom -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-value">22%</div>
+          <div class="metric-label">Tuesday</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">18%</div>
+          <div class="metric-label">Wednesday</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">5%</div>
+          <div class="metric-label">Thursday</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">67%</div>
+          <div class="metric-label">Friday</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>  
+  function updateProbabilities(list) {
+    // Tomorrow section = first item
+    document.querySelector(".current-percent").textContent =
+      list[0].snow_day_probability + "%";
+    document.querySelector(".current-label").textContent =
+      list[0].weekday
+    
+    // Metrics section = remaining 4 items
+    const metricValues = document.querySelectorAll(".metric-value");
+    const metricLabels = document.querySelectorAll(".metric-label");
+    
+    for (let i = 1; i < metricValues.length; i++) {
+      metricValues[i].textContent =
+        list[i].snow_day_probability + "%";
+      metricLabels[i].textContent =
+        list[i].weekday;
     }
+  }
 
-    loadPredictions();
-  </script>
+  updateProbabilities(results);
+</script>
+
+<script>
+  const results = JSON.parse(`{{ data | tojson | safe }}`);
+  updateProbabilities(results);
+</script>
+
 </body>
 </html>

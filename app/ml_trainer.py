@@ -49,7 +49,7 @@ def Train(data):
 
     MODEL = grid.best_estimator_
 
-    with open("app/model.pkl", "wb") as f:  # <- save to a folder your server can access
+    with open("model.pkl", "wb") as f:  # <- save to a folder your server can access
         pickle.dump(MODEL, f)
     print("BEST MODEL SETTINGS:")
     print(grid.best_params_)
@@ -101,9 +101,9 @@ def Test(data):
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("Data/training_dataset.csv")
-TESTING_DATA = weather.get_tomorrows_data()
+TRAINING_DATA = pd.read_csv("../data/training_dataset.csv")
+TESTING_DATA = weather.get_this_weeks_data()
 
 Train(TRAINING_DATA)
-#PrintFeatureImportance()
+PrintFeatureImportance()
 Test(TESTING_DATA)

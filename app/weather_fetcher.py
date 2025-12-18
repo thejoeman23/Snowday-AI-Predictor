@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from numpy.ma.extras import average
 
@@ -8,7 +9,8 @@ from numpy.ma.extras import average
 LATITUDE = 44.56
 LONGITUDE = -81.98
 
-SNOW_DAYS = pd.read_csv("Data/snow_day_dates.csv")
+CSV_PATH = Path(__file__).resolve().parent.parent / "data" / "snow_day_dates.csv"
+SNOW_DAYS = pd.read_csv(CSV_PATH)
 
 # ----------------------------------------
 
@@ -186,3 +188,5 @@ def save_to_file(data: pd.DataFrame, filename: str):
 
 #data = get_data_within_timerange("2024-11-01", "2025-04-30")
 #save_to_file(data, "training_dataset.csv")
+
+#save_to_file(get_this_weeks_data(), f"this week.csv")
