@@ -36,7 +36,8 @@
 body {
   background: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
-  padding: 24px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 /* PAGE */
