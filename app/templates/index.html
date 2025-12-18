@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.25" />
   <title>Snow Day Predictor</title>
 
   <!-- Inter Variable -->
@@ -11,7 +11,7 @@
     href="https://rsms.me/inter/inter.css"
   />
 
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="static/style.css" />
 </head>
 <body>
   <main class="page">
@@ -26,6 +26,10 @@
       <div class="current">
         <div class="current-percent">18%</div>
         <div class="current-label">Tomorrow</div>
+      </div>
+
+      <div class="others">
+        <div class="others-amount">2,367 other are hoping for a snow day 🔥</div>
       </div>
 
       <div>
@@ -76,8 +80,13 @@
 </script>
 
 <script>
-  const results = JSON.parse(`{{ data | tojson | safe }}`);
-  updateProbabilities(results);
+  function updateOthers(value) {
+    document.querySelector(".others-amount").textContent =
+      value + " others are hoping for a snow day 🔥";
+  }
+
+  const value = Number(`{{ counter_value }}`);
+  updateOthers(value);
 </script>
 
 </body>

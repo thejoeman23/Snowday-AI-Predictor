@@ -21,6 +21,9 @@
 
   --fs-metric-label-min: 14px;
   --fs-metric-label-max: 22px;
+
+  --fs-others-label-min: 10px;
+  --fs-others-label-max: 20px;
 }
 
 * {
@@ -86,6 +89,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: clamp(24px, 5vw, 36px);
+  position: relative;
 }
 
 /* DIVIDER */
@@ -103,6 +107,8 @@ body {
 
 .current {
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .current-percent {
@@ -118,6 +124,27 @@ body {
   color: var(--text-muted);
   letter-spacing: -0.02em;
   margin-top: clamp(-20px, -4vw, -30px);
+}
+
+.others {
+  position: absolute;  /* << frees layout, floats it */
+  top: 1;
+  right: 0;
+  margin-left: auto;
+  align-self: flex-start;
+  display: flex;
+  width: clamp(80px, 27vw, 225px);
+  margin-top: 32px;
+  margin-right: 24px;
+}
+
+.others-amount {
+  font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.02em;
+  margin-top: clamp(-20px, -4vw, -30px);
+  text-align: center;
 }
 
 /* METRICS */

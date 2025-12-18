@@ -6,6 +6,8 @@ from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
+from datetime import datetime, timedelta
+
 import pickle
 import pandas as pd
 
@@ -21,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 MODEL_PATH = BASE_DIR / "model.pkl"
+COUNTER_PATH = BASE_DIR / "counter.csv"
 
 # ───────────────────────────────────────────────────────────────
 # Jinja Templates + Static
@@ -60,15 +63,48 @@ async def home(request: Request):
             "snow_day_probability": float(odds)
         })
 
+    counter_value = update_counter()
+    print(counter_value)
+
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "data": results}
+        {"request": request, "data": results, "counter_value": counter_value}
     )
 
 
 # ───────────────────────────────────────────────────────────────
 # Helpers
 # ───────────────────────────────────────────────────────────────
+
+def update_counter():
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    # Create CSV if not exists
+    if not COUNTER_PATH.exists():
+        df = pd.DataFrame({"value": [0], "last_changed_date": [today_str]})
+        df.to_csv(COUNTER_PATH, index=False)
+
+    # Read existing
+    df = pd.read_csv(COUNTER_PATH)
+
+    value = int(df.loc[0, "value"])
+    last_date = str(df.loc[0, "last_changed_date"])
+
+    # Reset if new day
+    if last_date != today_str:
+        value = 0
+        last_date = today_str
+
+    # Increment
+    value += 1
+
+    # Save back
+    pd.DataFrame({
+        "value": [value],
+        "last_changed_date": [today_str]
+    }).to_csv(COUNTER_PATH, index=False)
+
+    return value
 
 def describe_day(target_date):
     """
