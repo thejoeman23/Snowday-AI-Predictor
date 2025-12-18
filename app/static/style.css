@@ -32,25 +32,21 @@
   padding: 0;
 }
 
-html, body {
-  height: 100dvh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
+body {
   background: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  padding: 24px;
 }
 
+/* PAGE */
+
 .page {
-  min-height: 100dvh;
-  width: 100%;
-  display: grid;
-  place-items: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: clamp(32px, 6vw, 60px);
-  padding: 24px;
-  background: var(--bg);
 }
 
 .header {
