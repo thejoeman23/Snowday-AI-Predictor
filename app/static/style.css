@@ -38,8 +38,10 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--bg);
+  overscroll-behavior: none;
+  background-color: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
-  height: 125%;
+  height: 100%;
   min-height: 100%;
 }
 
@@ -48,10 +50,6 @@ body {
   /* prevents white top/bottom bars */
   min-height: 100vh;
   min-height: -webkit-fill-available;
-
-  /* respect iPhone safe area + blend background */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
 
   /* keep your existing layout padding */
   padding-left: 24px;
