@@ -85,7 +85,10 @@ def PrintFeatureImportance():
 def Test(data):
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
+    with open("../app/model.pkl", "rb") as f:
+        MODEL = pickle.load(f)
     probs = MODEL.predict_proba(X)[:, 1]
+
 
     results = data.copy()
     results["snow_day_probability"] = probs
@@ -104,6 +107,6 @@ def Test(data):
 TRAINING_DATA = pd.read_csv("../data/training_dataset.csv")
 TESTING_DATA = weather.get_this_weeks_data()
 
-Train(TRAINING_DATA)
-PrintFeatureImportance()
+#Train(TRAINING_DATA)
+#PrintFeatureImportance()
 Test(TESTING_DATA)

@@ -36,7 +36,6 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 with open(MODEL_PATH, "rb") as f:
     MODEL = pickle.load(f)
 
-
 # ───────────────────────────────────────────────────────────────
 # Routes
 # ───────────────────────────────────────────────────────────────
