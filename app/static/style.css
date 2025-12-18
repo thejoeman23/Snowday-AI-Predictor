@@ -39,7 +39,6 @@ html, body {
   padding: 0;
   background: var(--bg);
   overscroll-behavior: none;
-  background-color: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
   height: 100%;
   min-height: 100%;
@@ -64,6 +63,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: clamp(32px, 6vw, 60px);
+  background: #000000;
 }
 
 .header {
