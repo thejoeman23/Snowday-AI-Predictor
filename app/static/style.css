@@ -33,15 +33,32 @@
   padding: 0;
 }
 
-body {
+/* GLOBAL RESET + SAFE AREA FIX */
+html, body {
+  margin: 0;
+  padding: 0;
   background: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
+  height: 100%;
+  min-height: 100%;
+}
+
+/* FULL SCREEN + NO WHITE BARS ON SAFARI */
+body {
+  /* prevents white top/bottom bars */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+
+  /* respect iPhone safe area + blend background */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+
+  /* keep your existing layout padding */
   padding-left: 24px;
   padding-right: 24px;
 }
 
-/* PAGE */
-
+/* PAGE LAYOUT */
 .page {
   min-height: 100vh;
   display: flex;
