@@ -53,6 +53,7 @@ body {
   /* keep your existing layout padding */
   padding-left: 24px;
   padding-right: 24px;
+  background: var(--bg);
 }
 
 /* PAGE LAYOUT */
@@ -63,7 +64,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: clamp(32px, 6vw, 60px);
-  background: #000000;
+  background: var(--bg);
 }
 
 .header {
