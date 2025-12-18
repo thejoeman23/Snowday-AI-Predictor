@@ -7,7 +7,9 @@ click==8.3.1
 fastapi==0.124.4
 h11==0.16.0
 idna==3.11
+Jinja2==3.1.6
 joblib==1.5.3
+MarkupSafe==3.0.3
 numpy==2.3.5
 pandas==2.3.3
 pydantic==2.12.5
