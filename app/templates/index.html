@@ -12,11 +12,11 @@
     href="https://rsms.me/inter/inter.css"
   />
 
+  <link rel="stylesheet" href="../static/style.css" />
   <link rel="stylesheet" href="static/style.css" />
 
   <!-- Optional: better behavior with dark mode -->
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-
+  <meta name="theme-color" content="#1d1c1c">
 </head>
 <body>
   <main class="page">
@@ -31,6 +31,12 @@
       <div class="current">
         <div class="current-percent">18%</div>
         <div class="current-label">Tomorrow</div>
+      </div>
+
+      <div class="reasons">
+        <div class="reason" id="reason1">Test Reason 1</div>
+        <div class="reason" id="reason2">Test Reason 2</div>
+        <div class="reason" id="reason3">Test Reason 3</div>
       </div>
 
       <div class="others">
@@ -67,10 +73,28 @@
       </div>
 
       <div>
-        <div class="disclaimer">*Long-range predictions may be innaccurate.</div>
+        <div class="disclaimer">*Long-range predictions may be inaccurate.</div>
       </div>
     </section>
   </main>
+  <footer class="footer">
+      <div class="footer-inner">
+        <h2 class="footer-title">Support • Feedback • Suggestions</h2>
+
+        <textarea
+          class="suggest-box"
+          id="feedbackBox"
+          placeholder="Type your message here…"
+        ></textarea>
+
+        <button class="suggest-btn" id="submitFeedback">
+          Submit
+        </button>
+
+        <p class="submit-status" id="submitStatus"></p>
+
+      </div>
+    </footer>
 
 <script>
   function updateProbabilities(list) {
@@ -100,6 +124,41 @@
 
   const value = Number(`{{ counter_value }}`);
   updateOthers(value);
+</script>
+
+<script>
+  const button = document.getElementById("submitFeedback");
+  const box = document.getElementById("feedbackBox");
+  const statusMsg = document.getElementById("submitStatus");
+
+  button.addEventListener("click", async () => {
+    const content = box.value.trim();
+
+    if (!content) {
+      box.focus();
+      return;
+    }
+
+    button.disabled = true;
+
+    try {
+      await fetch("https://discord.com/api/webhooks/1455940293374251171/usYpb_FqdvLcCxJkfFnKSCKPbvSTGpEhSYcrCfHurV43IIwArVN7xRjQo70csIgkPDy0", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `📩 New feedback:\n \n ${content}`
+        })
+      });
+
+      statusMsg.textContent = "Submitted — thank you!";
+      box.value = "";
+
+    } catch (err) {
+      statusMsg.textContent = "Submission failed. Try again later.";
+    }
+
+    button.disabled = false;
+  });
 </script>
 
 </body>

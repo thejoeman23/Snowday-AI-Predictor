@@ -37,38 +37,40 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  overscroll-behavior: none;
+  background-color: #1d1c1c;
+  overscroll-behavior-y: none;
   font-family: "Inter", system-ui, sans-serif;
   height: 100%;
   min-height: 100%;
 }
 
-/* FULL SCREEN + NO WHITE BARS ON SAFARI */
 body {
-  /* prevents white top/bottom bars */
   min-height: 100vh;
   min-height: -webkit-fill-available;
 
-  /* keep your existing layout padding */
-  padding-left: 24px;
-  padding-right: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
   background: var(--bg);
 }
 
 /* PAGE LAYOUT */
 .page {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: clamp(32px, 6vw, 60px);
-  background: var(--bg);
+
+  flex: 1;
+
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .header {
   text-align: center;
+  margin-top: 50px;
 }
 
 /* HEADER TEXT */
@@ -133,6 +135,34 @@ body {
   margin-top: clamp(-20px, -4vw, -30px);
 }
 
+/* Reasons */
+
+.reasons {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  margin-top: -15px;
+}
+
+.reason {
+  display: flex;
+  align-items: center;     /* vertical centering */
+  justify-content: center; /* horizontal centering */
+
+  font-size: clamp(var(--fs-metric-label-min), 3.5vw, var(--fs-metric-label-max));
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  letter-spacing: -0.02em;
+  margin: 0 6px;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+/* Others Counter */
+
 .others {
   position: absolute;  /* << frees layout, floats it */
   top: 1;
@@ -142,7 +172,7 @@ body {
   display: flex;
   width: clamp(80px, 27vw, 225px);
   margin-top: 32px;
-  margin-right: 24px;
+  margin-right: 24px; 
 }
 
 .others-amount {
@@ -236,4 +266,60 @@ body {
     grid-template-columns: repeat(2, 1fr);
     row-gap: 24px;
   }
+}
+
+/* FOOTER */
+
+.footer {
+  background: #ffffff;
+  color: #000000;
+  padding: 40px 24px;
+  flex-shrink: 0;
+
+  margin-top: 50px;
+}
+
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.footer-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.suggest-box {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px 14px;
+
+  font-size: 14px;
+  border-radius: 12px;
+  border: 1px solid #cccccc;
+
+  resize: vertical;
+}
+
+.suggest-btn {
+  margin-top: 10px;
+  padding: 10px 16px;
+
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+
+  font-weight: 600;
+  background: black;
+  color: white;
+}
+
+.suggest-btn:hover {
+  opacity: 0.85;
+}
+
+.submit-status {
+  font-size: 13px;
+  margin-top: 8px;
 }
