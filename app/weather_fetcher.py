@@ -146,33 +146,13 @@ def get_last_weeks_data(use_forecast: bool = False) -> pd.DataFrame:
     )
 
 def get_this_weeks_data() -> pd.DataFrame:
-    """Get today's data + the next 4 weekdays using range + trim."""
-
-    today = datetime.today().date()
-
-    # Expand far enough to guarantee we capture 5 weekdays
-    # Even if today is Friday, range will spill over weekend & into next week
-    end_range = today + timedelta(days=9)
-
-    df = get_data_within_timerange(
-        today.strftime("%Y-%m-%d"),
-        end_range.strftime("%Y-%m-%d"),
-        use_forecast=True
-    )
-
-    # We only need the first 5 rows (today + next 4 days)
-    df = df.head(5).reset_index(drop=True)
-
-    return df
-
-def get_this_weeks_data() -> pd.DataFrame:
     """Return 5 weekdays starting today (before 8am) or tomorrow (after 8am)."""
 
     now = datetime.now()
     today = now.date()
 
     # Decide the starting date
-    start = today if now.hour < 8 else today + timedelta(days=1)
+    start = today if now.hour < 7 else today + timedelta(days=1)
 
     dates = []
     current = start

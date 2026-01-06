@@ -78,22 +78,26 @@ async def home(request: Request):
 
 def update_counter():
     today_str = datetime.now().strftime("%Y-%m-%d")
+    hour_str = datetime.now().strftime("%H")
 
     # Create CSV if not exists
     if not COUNTER_PATH.exists():
-        df = pd.DataFrame({"value": [0], "last_changed_date": [today_str]})
+        df = pd.DataFrame({"value": [1], "last_changed_date": [today_str], "hour": [hour_str]})
         df.to_csv(COUNTER_PATH, index=False)
+        return 1
 
     # Read existing
     df = pd.read_csv(COUNTER_PATH)
 
     value = int(df.loc[0, "value"])
     last_date = str(df.loc[0, "last_changed_date"])
+    hour = int(df.loc[0, "hour"])
 
     # Reset if new day
-    if last_date != today_str:
+    if last_date != today_str or hour < 7:
         value = 0
         last_date = today_str
+        hour = hour_str
 
     # Increment
     value += 1
@@ -101,7 +105,8 @@ def update_counter():
     # Save back
     pd.DataFrame({
         "value": [value],
-        "last_changed_date": [today_str]
+        "last_changed_date": [today_str],
+        "hour": [hour_str]
     }).to_csv(COUNTER_PATH, index=False)
 
     return value
@@ -121,8 +126,8 @@ def describe_day(target_date):
     diff = (date - today).days
 
     if diff == 0:
-        return "today"
+        return "Today"
     if diff == 1:
-        return "tomorrow"
+        return "Tomorrow"
 
     return date.day_name()
