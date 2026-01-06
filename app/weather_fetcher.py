@@ -7,6 +7,7 @@ import numpy as np
 from numpy.ma.extras import average
 
 # ---------------- CONFIG ----------------
+
 LATITUDE = 44.56
 LONGITUDE = -81.98
 
