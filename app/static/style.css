@@ -37,7 +37,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #212121;
+  background-color: #2c2929;
   overscroll-behavior-y: none;
   font-family: "Inter", system-ui, sans-serif;
   height: 100%;
