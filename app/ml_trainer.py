@@ -1,9 +1,13 @@
 import pandas as pd
+import numpy as np
 import pickle
 import weather_fetcher as weather
+
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
+
+import shap
 
 # ---------------- CONFIG ----------------
 
@@ -30,7 +34,7 @@ def Train(data):
         "n_estimators": [100, 300, 500],
         "max_depth": [None, 6, 10, 15],
         "min_samples_split": [2, 5, 10],
-        "class_weight": ["balanced"]
+        "class_weight": [None, "balanced"],
     }
 
     base_model = RandomForestClassifier(
@@ -83,30 +87,71 @@ def PrintFeatureImportance():
         print(f"- {row['feature']}")
 
 def Test(data):
+
+    # features used by the model
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
+    # load model
     with open("../app/model.pkl", "rb") as f:
         MODEL = pickle.load(f)
+
+    # predicted probability of snow day
     probs = MODEL.predict_proba(X)[:, 1]
 
+    # ---- SHAP EXPLAINER ----
+    explainer = shap.TreeExplainer(MODEL)
+
+    # shap_values shape: [n_samples, n_features]
+    shap_values = explainer.shap_values(X)[1]  # class 1 = snow day
+
+    feature_names = X.columns.tolist()
 
     results = data.copy()
     results["snow_day_probability"] = probs
 
-    print("SNOW DAY ODDS")
+    print("SNOW DAY ODDS\n")
 
-    for _, row in results.iterrows():
+    # iterate each day
+    for i, row in results.iterrows():
+
         weekday = pd.to_datetime(row["date"]).day_name()
+
         odds = (
-            row["snow_day_probability"] * 100 if row["snowfall_24h"] != 0 else 0.01
+            row["snow_day_probability"] * 100 if row.get("snowfall_24h", 0) != 0 else 0.01
         )
-        print(f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day (so {"yes" if odds > 50 else "no"})")
+
+        # shap values for this prediction
+        contrib = shap_values[i]
+
+        # most important = largest absolute SHAP
+        order = np.argsort(np.abs(contrib))[::-1]
+        top3_idx = order[:3]
+
+        # build readable bullet points
+        explanations = []
+        for j in top3_idx:
+            feat = feature_names[j]
+            val = row[feat]
+            direction = "increased" if contrib[j] > 0 else "reduced"
+            explanations.append(f"{feat} = {val} ({direction} chance)")
+
+        # ---- PRINT RESULT ----
+        print(
+            f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day "
+            f"(so {'yes' if odds > 50 else 'no'})"
+        )
+
+        print("  Top factors:")
+        for e in explanations:
+            print("   •", e)
+
+        print()
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("../data/training_dataset.csv")
-TESTING_DATA = weather.get_this_weeks_data()
+TRAINING_DATA = pd.read_csv("../data/training_dataset_1.csv")
+TESTING_DATA = weather.t()
 
-#Train(TRAINING_DATA)
-#PrintFeatureImportance()
+Train(TRAINING_DATA)
+PrintFeatureImportance()
 Test(TESTING_DATA)

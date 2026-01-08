@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import numpy as np
 
-from numpy.ma.extras import average
-
 # ---------------- CONFIG ----------------
 
 LATITUDE = 44.56
@@ -20,6 +18,14 @@ SNOW_DAYS = pd.read_csv(CSV_PATH)
 def is_weekday(date: datetime) -> bool:
     return date.weekday() < 5
 
+def safe_min(values):
+    values = [v for v in values if v is not None]
+    return min(values) if values else 0
+
+def safe_mean(values):
+    values = [v for v in values if v is not None]
+    return sum(values) / len(values) if values else 0
+
 def fetch_weather(start_date: str, end_date: str, use_forecast: bool = False) -> dict:
     if use_forecast:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -29,83 +35,105 @@ def fetch_weather(start_date: str, end_date: str, use_forecast: bool = False) ->
     params = {
         "latitude": LATITUDE,
         "longitude": LONGITUDE,
-        "hourly": [
-            "temperature_2m",
-            "snowfall",
-            "windspeed_10m",
-            "dewpoint_2m"
-        ],
+
         "start_date": start_date,
         "end_date": end_date,
-        "timezone": "auto"
+
+        "daily": ["temperature_2m_mean", "snowfall_sum", "precipitation_sum", "temperature_2m_min",
+                  "wind_gusts_10m_max"],
+        "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "precipitation", "snowfall", "snow_depth",
+                   "weather_code", "wind_speed_10m", "wind_gusts_10m"],
+
+        "timezone": "America/New_York",
     }
 
     r = requests.get(url, params=params)
     return r.json()
 
+def get_hourly_for_date(hourly, target_date):
+
+    hourly_times = pd.to_datetime(hourly["time"]).strftime("%Y-%m-%d")
+
+    mask = (hourly_times == target_date)
+
+    if not mask.any():
+        return None
+
+    # Creates a dictionary
+    return {
+        key: [hourly[key][i] for i, ok in enumerate(mask) if ok]
+        for key in hourly.keys()
+    }
+
+def get_daily_for_date(daily, target_date):
+
+    daily_times = pd.to_datetime(daily["time"]).strftime("%Y-%m-%d")
+
+    mask = (daily_times == target_date)
+
+    if not mask.any():
+        return None
+
+    # first matching daily row
+    day_index = list(mask).index(True)
+
+    # creating a dictionary
+    return {key: daily[key][day_index] for key in daily.keys()}
+
 def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool = False) -> pd.DataFrame:
-    """Fetch weather data for all weekdays in a date range, using one API call."""
     print("REQUESTING:", start_date, "→", end_date)
     rows = []
 
     current = datetime.fromisoformat(start_date)
     end = datetime.fromisoformat(end_date)
 
-    # --- FETCH ALL WEATHER AT ONCE ---
     data = fetch_weather(start_date, end_date, use_forecast=use_forecast)
 
-    if "hourly" not in data:
-        raise ValueError(f"No hourly data returned. Keys: {data.keys()}")
-
     hourly = data["hourly"]
+    daily = data["daily"]
 
-    # Convert timestamps to datetime
-    times = pd.to_datetime(hourly["time"])
-
-    # Convert hourly values to NumPy for speed
-    arr_temp = np.array(hourly["temperature_2m"])
-    arr_snow = np.array(hourly["snowfall"])
-    arr_wind = np.array(hourly["windspeed_10m"])
-    arr_dew = np.array(hourly["dewpoint_2m"])
+    # pandas datetimes for matching
 
     while current <= end:
 
+        # skip weekends
         if not is_weekday(current):
             current += timedelta(days=1)
             continue
 
         date_str = current.strftime("%Y-%m-%d")
 
-        # --- MASK: hours belonging to this date only ---
-        mask = (times.date == current.date())
-        idx = np.where(mask)[0]
+        today_hourly = get_hourly_for_date(hourly, date_str)
+        today_daily = get_daily_for_date(daily, date_str)
 
-        if len(idx) == 0:
-            print(f"WARNING: No hourly data for {date_str}")
-            current += timedelta(days=1)
-            continue
+        today_temp = today_hourly["temperature_2m"]
+        today_precipitation = today_hourly["precipitation"]
+        today_snow = today_hourly["snowfall"]
+        today_snow_depth = today_hourly["snow_depth"]
+        today_wind = today_hourly["wind_speed_10m"]
+        today_wind_gusts = today_hourly["wind_gusts_10m"]
+        today_humidity = today_hourly["relative_humidity_2m"]
+        today_dew  = today_hourly["dew_point_2m"]
+        today_weather_code = today_hourly["weather_code"]
 
-        # Today’s sliced weather values
-        today_temp = arr_temp[idx]
-        today_snow = arr_snow[idx]
-        today_wind = arr_wind[idx]
-        today_dew = arr_dew[idx]
+        # overnight = first 8 hours
+        overnight_wind = today_wind[:8]
+        overnight_dew  = today_dew[:8]
+        overnight_humidity = today_humidity[:8]
+        overnight_wind_gusts = today_wind_gusts[:8]
 
-        # Overnight = midnight to 8am window
-        overnight_slice = slice(0, min(8, len(today_temp)))
+        overnight_weather_code = today_weather_code[:8]
 
-        snowfall_overnight = np.nansum(today_snow[overnight_slice])
-        snowfall_24h = np.nansum(today_snow)
+        def safe_mean(values):
+            values = [v for v in values if v is not None]
+            return sum(values) / len(values) if values else 0
 
-        overnight_temp = today_temp[overnight_slice]
-        overnight_wind = today_wind[overnight_slice]
-        overnight_dew = today_dew[overnight_slice]
+        snowfall_overnight = sum(today_snow[:8])
+        snowfall_24h = today_daily["snowfall_sum"]
 
-        temp_min_overnight = np.nanmin(overnight_temp)
-        windspeed_avg_overnight = np.nanmean(overnight_wind)
-        dewpoint_avg_overnight = np.nanmean(overnight_dew)
+        precipitation_overnight = sum(today_precipitation[:8])
+        precipitation_24h = today_daily["precipitation_sum"]
 
-        # Build row
         row = {
             "date": date_str,
             "snow_day": int((SNOW_DAYS["date"].astype(str) == date_str).any()),
@@ -113,27 +141,42 @@ def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool
             "snowfall_overnight": snowfall_overnight,
             "snowfall_24h": snowfall_24h,
 
+            "precipitation_overnight": precipitation_overnight,
+            "precipitation_24h": precipitation_24h,
+
             "no_snowfall_penalty": (
                 2 if snowfall_24h == 0
                 else 1 if snowfall_overnight < 1
                 else 0
             ),
 
-            "temp_min_overnight": temp_min_overnight,
-            "windspeed_avg_overnight": windspeed_avg_overnight,
-            "dewpoint_avg_overnight": dewpoint_avg_overnight,
+            "freezing_rain": (
+                    any(code in {51, 53, 55, 61, 63, 65, 66, 67} for code in today_weather_code[:17])
+                    and -2 <= today_daily["temperature_2m_min"] <= 1
+            ),
+
+            "temp_min_overnight": today_daily["temperature_2m_min"],
+            "wind_speed_avg_overnight": safe_mean(overnight_wind),
+            "wind_gusts_max_overnight": max(overnight_wind_gusts),
+            "dewpoint_avg_overnight": safe_mean(overnight_dew),
+            "humidity_avg_overnight": safe_mean(overnight_humidity),
         }
 
-        # First 8 hours feature loop
+        # first 8 hours
         for h in range(8):
             row[f"temperature{h}"] = today_temp[h] if h < len(today_temp) else 0
-            row[f"snowfall{h}"]    = today_snow[h] if h < len(today_snow) else 0
-            row[f"windspeed{h}"]   = today_wind[h] if h < len(today_wind) else 0
+            row[f"precipitation{h}"] = today_precipitation[h] if h < len(today_precipitation) else 0
+            row[f"snowfall{h}"] = today_snow[h] if h < len(today_snow) else 0
+            row[f"snow_depth{h}"] = today_snow_depth[h] if h < len(today_snow_depth) else 0
+            row[f"wind_speed{h}"] = today_wind[h] if h < len(today_wind) else 0
+            row[f"wind_gusts{h}"] = today_wind_gusts[h] if h < len(today_wind_gusts) else 0
+            row[f"weather_code{h}"] = today_weather_code[h] if h < len(today_weather_code) else 0
 
         rows.append(row)
         current += timedelta(days=1)
 
     return pd.DataFrame(rows)
+
 
 def get_last_weeks_data(use_forecast: bool = False) -> pd.DataFrame:
     """Fetch weather data for last week (Mon–Fri)."""
@@ -144,6 +187,18 @@ def get_last_weeks_data(use_forecast: bool = False) -> pd.DataFrame:
         last_monday.strftime("%Y-%m-%d"),
         last_friday.strftime("%Y-%m-%d"),
         use_forecast=use_forecast
+    )
+
+def t() -> pd.DataFrame:
+    today = datetime.today()
+    monday = today - timedelta(days=today.weekday())
+    friday = monday + timedelta(days=4)
+
+    print(monday.day)
+    return get_data_within_timerange(
+        monday.strftime("%Y-%m-%d"),
+        friday.strftime("%Y-%m-%d"),
+        use_forecast=True
     )
 
 def get_this_weeks_data() -> pd.DataFrame:
@@ -195,6 +250,7 @@ def save_to_file(data: pd.DataFrame, filename: str):
     print(f"Saved {len(data)} rows to {filename}")
 
 #data = get_data_within_timerange("2024-11-01", "2025-04-30")
-#save_to_file(data, "training_dataset.csv")
+#save_to_file(data, "../data/training_dataset_1.csv")
 
-#save_to_file(get_this_weeks_data(), f"this week.csv")
+#data = t()
+#save_to_file(data, f"this week.csv")
