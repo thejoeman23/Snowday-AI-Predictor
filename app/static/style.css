@@ -1,7 +1,7 @@
 :root {
   /* COLORS */
-  --bg: linear-gradient(180deg, #292727, #000000);
-  --card-bg: #222222;
+  --bg: linear-gradient(180deg, #2c2929, #000000);
+  --card-bg: #22222239;
   --text-white: #ffffff;
   --text-muted: #636363;
   --accent: #59A6F7;
@@ -37,7 +37,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #292727;
+  background-color: #212121;
   overscroll-behavior-y: none;
   font-family: "Inter", system-ui, sans-serif;
   height: 100%;
@@ -45,7 +45,7 @@ html, body {
 }
 
 body {
-  min-height: 130%;
+  min-height: 140%;
 
   display: flex;
   flex-direction: column;
@@ -108,7 +108,13 @@ body {
   flex-direction: column;
   gap: clamp(24px, 5vw, 36px);
   position: relative;
+
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
+
 
 /* TOMORROW */
 
@@ -200,6 +206,10 @@ body {
 
   margin: 0 auto;
   border-radius: 10px;
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.363);
 }
 
 @keyframes slideDivider {
@@ -272,7 +282,7 @@ body {
 }
 
 .upcoming-updates-content {
-  font-size: clamp(10px, 2.5vw, 14px);
+  font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
   font-weight: 400;
   color: var(--text-muted);
   letter-spacing: -0.02em;
