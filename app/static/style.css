@@ -45,12 +45,11 @@ html, body {
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100%;
   min-height: -webkit-fill-available;
 
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 
   background: var(--bg);
 }
@@ -257,6 +256,29 @@ body {
   text-align: center;
   margin-top: -10px;
   margin-bottom: -10px;
+}
+
+/* UPCOMING UPDATES CARD */
+
+.upcoming-updates-label {
+  font-size: clamp(var(--fs-metric-label-min), 3vw, var(--fs-metric-label-max));
+  font-weight: 700;
+  background: var(--text-white);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.04em;
+  text-align: left;
+  margin-top: -5px;
+}
+
+.upcoming-updates-content {
+  font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+  line-height: 1.4;
 }
 
 /* MOBILE */
