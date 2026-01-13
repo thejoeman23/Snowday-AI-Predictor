@@ -162,19 +162,22 @@
     });
 
     fetch(counterApi)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("API error");
+    .then(
+      response => 
+      {
+        if (!response.ok) {
+          throw new Error("API error");
+        }
+        return response
       }
-      return response.json();
-    })
+    )
     .then(data => {
       console.log("Counter:", data);
 
       // cache it
       localStorage.setItem(
         "counter_value",
-        JSON.stringify(data)
+        data
       );
 
       // render it
@@ -186,7 +189,7 @@
       // fallback to cache
       const cached = localStorage.getItem("counter_value");
       if (cached) {
-        updateOthers(JSON.parse(cached));
+        updateOthers(cached);
       } else {
         showError("Unable to load counter");
       }
