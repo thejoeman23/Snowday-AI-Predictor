@@ -157,13 +157,6 @@
         showError("Unable to load predictions");
       }
     });
-
-
-  const results = JSON.parse(`{{ data | tojson | safe }}`);
-  updateProbabilities(results);
-
-  const value = Number(`{{ counter_value }}`);
-  updateOthers(value);
 </script>
 
 <script>
