@@ -127,7 +127,10 @@
       value + " others are hoping for a snow day 🔥";
   }
 
-  fetch("https://api.snowdaypredictor.io/predict")
+  const predictApi = "https://api.snowdaypredictor.io/predict";
+  const counterApi = "https://api.snowdaypredictor.io/count";
+
+  fetch(predictApi)
     .then(response => {
       if (!response.ok) {
         throw new Error("API error");
@@ -155,6 +158,37 @@
         updateProbabilities(JSON.parse(cached));
       } else {
         showError("Unable to load predictions");
+      }
+    });
+
+    fetch(counterApi)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("Counter:", data);
+
+      // cache it
+      localStorage.setItem(
+        "counter_value",
+        JSON.stringify(data)
+      );
+
+      // render it
+      updateOthers(data);
+    })
+    .catch(err => {
+      console.error(err);
+
+      // fallback to cache
+      const cached = localStorage.getItem("counter_value");
+      if (cached) {
+        updateOthers(JSON.parse(cached));
+      } else {
+        showError("Unable to load counter");
       }
     });
 </script>
