@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 from pathlib import Path
-import numpy as np
 
 # ---------------- CONFIG ----------------
 

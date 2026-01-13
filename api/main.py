@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import pickle
 import pandas as pd
 
-from app import weather_fetcher
+from api import weather_fetcher
 
 # ───────────────────────────────────────────────────────────────
 # App + Paths
@@ -20,17 +20,21 @@ from app import weather_fetcher
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
-TEMPLATE_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR / "static"
 MODEL_PATH = BASE_DIR / "model.pkl"
 COUNTER_PATH = BASE_DIR / "counter.csv"
 
 # ───────────────────────────────────────────────────────────────
-# Jinja Templates + Static
+# Allowing
 # ───────────────────────────────────────────────────────────────
 
-templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://snowdaypredictor.io"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ───────────────────────────────────────────────────────────────
 # Load Model
@@ -43,8 +47,8 @@ with open(MODEL_PATH, "rb") as f:
 # Routes
 # ───────────────────────────────────────────────────────────────
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+@app.get("/predictions")
+async def predictions():
     # Get prediction data
     data = weather_fetcher.get_this_weeks_data()
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
@@ -66,10 +70,10 @@ async def home(request: Request):
     counter_value = update_counter()
     print(counter_value)
 
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "data": results, "counter_value": counter_value}
-    )
+    return {
+        "data": results,
+        "counter_value": counter_value
+    }
 
 
 # ───────────────────────────────────────────────────────────────
