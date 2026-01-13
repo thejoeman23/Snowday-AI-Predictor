@@ -47,7 +47,7 @@ with open(MODEL_PATH, "rb") as f:
 # Routes
 # ───────────────────────────────────────────────────────────────
 
-@app.get("/predictions")
+@app.get("/predict")
 async def predictions():
     # Get prediction data
     data = weather_fetcher.get_this_weeks_data()
@@ -70,17 +70,10 @@ async def predictions():
     counter_value = update_counter()
     print(counter_value)
 
-    return {
-        "data": results,
-        "counter_value": counter_value
-    }
+    return results
 
-
-# ───────────────────────────────────────────────────────────────
-# Helpers
-# ───────────────────────────────────────────────────────────────
-
-def update_counter():
+@app.get("/count")
+async def update_counter():
     today_str = datetime.now().strftime("%Y-%m-%d")
     hour_str = datetime.now().strftime("%H")
 
@@ -114,6 +107,11 @@ def update_counter():
     }).to_csv(COUNTER_PATH, index=False)
 
     return value
+
+
+# ───────────────────────────────────────────────────────────────
+# Helpers
+# ───────────────────────────────────────────────────────────────
 
 def describe_day(target_date):
     """

@@ -106,6 +106,7 @@
     </footer>
 
 <script>
+
   function updateProbabilities(list) {
     document.querySelector(".current-percent").textContent =
       list[0].snow_day_probability + "%";
@@ -121,15 +122,45 @@
     }
   }
 
-  const results = JSON.parse(`{{ data | tojson | safe }}`);
-  updateProbabilities(results);
-</script>
-
-<script>
   function updateOthers(value) {
     document.querySelector(".others-amount").textContent =
       value + " others are hoping for a snow day 🔥";
   }
+
+  fetch("https://api.snowdaypredictor.io/predict")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("Predictions:", data);
+
+      // cache it
+      localStorage.setItem(
+        "snowday_predictions",
+        JSON.stringify(data)
+      );
+
+      // render it
+      updateProbabilities(data);
+    })
+    .catch(err => {
+      console.error(err);
+
+      // fallback to cache
+      const cached = localStorage.getItem("snowday_predictions");
+      if (cached) {
+        updateProbabilities(JSON.parse(cached));
+      } else {
+        showError("Unable to load predictions");
+      }
+    });
+
+
+  const results = JSON.parse(`{{ data | tojson | safe }}`);
+  updateProbabilities(results);
 
   const value = Number(`{{ counter_value }}`);
   updateOthers(value);
