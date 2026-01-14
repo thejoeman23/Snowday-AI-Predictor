@@ -107,72 +107,59 @@
 
 <script>
 
-  function updateProbabilities(list) {
-    document.querySelector(".current-percent").textContent =
-      list[0].snow_day_probability + "%";
-    document.querySelector(".current-label").textContent =
-      list[0].weekday;
+  document.addEventListener("DOMContentLoaded", () => {
+    function updateProbabilities(list) {
+      document.querySelector(".current-percent").textContent =
+        list[0].snow_day_probability + "%";
+      document.querySelector(".current-label").textContent =
+        list[0].weekday;
 
-    const metricValues = document.querySelectorAll(".metric-value");
-    const metricLabels = document.querySelectorAll(".metric-label");
+      const metricValues = document.querySelectorAll(".metric-value");
+      const metricLabels = document.querySelectorAll(".metric-label");
 
-    for (let i = 1; i < list.length; i++) {
-      metricValues[i - 1].textContent = list[i].snow_day_probability + "%";
-      metricLabels[i - 1].textContent = list[i].weekday;
+      for (let i = 1; i < list.length; i++) {
+        metricValues[i - 1].textContent = list[i].snow_day_probability + "%";
+        metricLabels[i - 1].textContent = list[i].weekday;
+      }
     }
-  }
 
-  function updateOthers(value) {
-    document.querySelector(".others-amount").textContent =
-      value + " others are hoping for a snow day 🔥";
-  }
+    function updateOthers(value) {
+      document.querySelector(".others-amount").textContent =
+        value + " others are hoping for a snow day 🔥";
+    }
 
-  const predictApi = "https://api.snowdaypredictor.io/predict";
-  const counterApi = "https://api.snowdaypredictor.io/count";
+    const predictApi = "https://api.snowdaypredictor.io/predictions";
+    const counterApi = "https://api.snowdaypredictor.io/count";
 
-  // READ CACHE FIRST
-  const cachedCounter = localStorage.getItem("counter_value");
-  if (cachedCounter !== null) {
-    updateOthers(Text(cachedCounter));
-  }
+    // ✅ READ CACHE FIRST
+    const cachedCounter = localStorage.getItem("counter_value");
+    if (cachedCounter !== null) {
+      updateOthers(Number(cachedCounter));
+    }
 
-  const cachedPredictions = localStorage.getItem("snowday_predictions");
-  if (cachedPredictions) {
-    updateProbabilities(JSON.parse(cachedPredictions));
-  }
+    const cachedPredictions = localStorage.getItem("snowday_predictions");
+    if (cachedPredictions) {
+      const parsed = JSON.parse(cachedPredictions);
+      updateProbabilities(parsed.data);
+    }
 
-  fetch(predictApi)
-    .then(response => {
-      if (!response.ok) throw new Error("API error");
-      return response.json();
-    })
-    .then(data => {
-      localStorage.setItem(
-        "snowday_predictions",
-        JSON.stringify(data)
-      );
-      updateProbabilities(data);
-    })
-    .catch(err => {
-      console.error(err);
-      // cache already rendered
-    });
+    // ✅ FETCH FRESH
+    fetch(predictApi)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        localStorage.setItem("snowday_predictions", JSON.stringify(data));
+        updateProbabilities(data.data);
+      })
+      .catch(console.error);
 
-
-  fetch(counterApi)
-    .then(response => {
-      if (!response.ok) throw new Error("API error");
-      return response.text();
-    })
-    .then(counter => {
-      localStorage.setItem("counter_value", counter);
-      updateOthers(counter);
-    })
-    .catch(err => {
-      console.error(err);
-      // cache already rendered
-    });
-
+    fetch(counterApi)
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(counter => {
+        localStorage.setItem("counter_value", counter);
+        updateOthers(Number(counter));
+      })
+      .catch(console.error);
+  });
 </script>
 
 <script>
