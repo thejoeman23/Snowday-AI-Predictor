@@ -15,7 +15,10 @@
   --fs-title-max: 38px;
 
   --fs-tomorrow-min: 48px;
-  --fs-tomorrow-max: 77px;
+  --fs-tomorrow-max: 80px;
+
+  --fs-tomorrow-percent-min: 48px;
+  --fs-tomorrow-percent-max: 80px;
 
   --fs-metric-value-min: 36px;
   --fs-metric-value-max: 64px;
@@ -126,7 +129,7 @@ body {
 
 .current-percent {
   font-size: clamp(var(--fs-tomorrow-min), 12vw, var(--fs-tomorrow-max));
-  font-weight: 700;
+  font-weight: bold;
   color: var(--text-white);
   letter-spacing: -0.04em;
 }
@@ -244,7 +247,7 @@ body {
 
 .metric-value {
   font-size: clamp(var(--fs-metric-value-min), 8vw, var(--fs-metric-value-max));
-  font-weight: 700;
+  font-weight: bold;
   color: var(--text-white);
   letter-spacing: -0.04em;
 }
