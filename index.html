@@ -153,7 +153,7 @@
       .catch(console.error);
 
     fetch(counterApi)
-      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(r => r.ok ? r : Promise.reject())
       .then(counter => {
         localStorage.setItem("counter_value", counter);
         updateOthers(Number(counter));
