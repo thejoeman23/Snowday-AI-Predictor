@@ -123,11 +123,16 @@ body {
 
 .current {
   text-align: center;
-  display: flex;
-  flex-direction: column;
 }
 
 .current-percent {
+  font-size: clamp(var(--fs-tomorrow-min), 12vw, var(--fs-tomorrow-max));
+  font-weight: bold;
+  color: var(--text-white);
+  letter-spacing: -0.04em;
+}
+
+.current-percent-sign {
   font-size: clamp(var(--fs-tomorrow-min), 12vw, var(--fs-tomorrow-max));
   font-weight: bold;
   color: var(--text-white);
@@ -183,6 +188,15 @@ body {
 }
 
 .others-amount {
+  font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.02em;
+  margin-top: clamp(-20px, -4vw, -30px);
+  text-align: center;
+}
+
+.others-text {
   font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
   font-weight: 600;
   color: var(--text-muted);
