@@ -140,7 +140,7 @@
     const cachedPredictions = localStorage.getItem("snowday_predictions");
     if (cachedPredictions) {
       const parsed = JSON.parse(cachedPredictions);
-      updateProbabilities(parsed.data);
+      updateProbabilities(parsed);
     }
 
     // ✅ FETCH FRESH
@@ -148,7 +148,7 @@
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => {
         localStorage.setItem("snowday_predictions", JSON.stringify(data));
-        updateProbabilities(data.data);
+        updateProbabilities(data);
       })
       .catch(console.error);
 
