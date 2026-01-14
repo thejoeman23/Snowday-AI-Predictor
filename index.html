@@ -130,70 +130,49 @@
   const predictApi = "https://api.snowdaypredictor.io/predict";
   const counterApi = "https://api.snowdaypredictor.io/count";
 
+  // READ CACHE FIRST
+  const cachedCounter = localStorage.getItem("counter_value");
+  if (cachedCounter !== null) {
+    updateOthers(Text(cachedCounter));
+  }
+
+  const cachedPredictions = localStorage.getItem("snowday_predictions");
+  if (cachedPredictions) {
+    updateProbabilities(JSON.parse(cachedPredictions));
+  }
+
   fetch(predictApi)
     .then(response => {
-      if (!response.ok) {
-        throw new Error("API error");
-      }
+      if (!response.ok) throw new Error("API error");
       return response.json();
     })
     .then(data => {
-      console.log("Predictions:", data);
-
-      // cache it
       localStorage.setItem(
         "snowday_predictions",
         JSON.stringify(data)
       );
-
-      // render it
       updateProbabilities(data);
     })
     .catch(err => {
       console.error(err);
-
-      // fallback to cache
-      const cached = localStorage.getItem("snowday_predictions");
-      if (cached) {
-        updateProbabilities(JSON.parse(cached));
-      } else {
-        showError("Unable to load predictions");
-      }
+      // cache already rendered
     });
 
-    fetch(counterApi)
-    .then(
-      response => 
-      {
-        if (!response.ok) {
-          throw new Error("API error");
-        }
-        return response
-      }
-    )
-    .then(data => {
-      console.log("Counter:", data);
 
-      // cache it
-      localStorage.setItem(
-        "counter_value",
-        data
-      );
-
-      // render it
-      updateOthers(data);
+  fetch(counterApi)
+    .then(response => {
+      if (!response.ok) throw new Error("API error");
+      return response.text();
+    })
+    .then(counter => {
+      localStorage.setItem("counter_value", counter);
+      updateOthers(counter);
     })
     .catch(err => {
       console.error(err);
-
-      // fallback to cache
-      const cached = localStorage.getItem("counter_value");
-      if (cached) {
-        updateOthers(cached);
-      } else {
-        showError("Unable to load counter");
-      }
+      // cache already rendered
     });
+
 </script>
 
 <script>
