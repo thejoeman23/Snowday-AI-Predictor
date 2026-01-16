@@ -1,5 +1,5 @@
-const predictApi = "https://api.snowdaypredictor.io/predict";
-const counterApi = "https://api.snowdaypredictor.io/count";
+const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
+const counterApi = "https://snowday-ai-predictor.fly.dev/count";
 
 /* -------------------------
    ODOMETER REGISTRY
@@ -47,11 +47,15 @@ function updateProbabilities(list) {
   const metricLabels = document.querySelectorAll(".metric-label");
 
   for (let i = 1; i < list.length; i++) {
+    // i = 1 since list[0] was already used for the currect percentage
+    const index = i - 1; // i -1 because metricValues/Labels start at 0 
+
     updateOdometer(
-      metricValues[i - 1],
+      metricValues[index],
       Number(list[i].snow_day_probability)
     );
-    metricLabels[i - 1].textContent = list[i].weekday;
+
+    metricLabels[index].textContent = list[i].weekday;
   }
 }
 
