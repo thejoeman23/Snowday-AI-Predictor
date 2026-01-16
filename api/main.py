@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import pickle
 import pandas as pd
 
-from api import weather_fetcher
+import weather_fetcher
 
 # ───────────────────────────────────────────────────────────────
 # App + Paths
