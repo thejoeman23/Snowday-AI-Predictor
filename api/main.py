@@ -24,6 +24,17 @@ MODEL_PATH = BASE_DIR / "model.pkl"
 COUNTER_PATH = BASE_DIR / "counter.csv"
 
 # ───────────────────────────────────────────────────────────────
+# Run App
+# ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
+
+
+# ───────────────────────────────────────────────────────────────
 # Allowing
 # ───────────────────────────────────────────────────────────────
 
@@ -39,6 +50,9 @@ app.add_middleware(
 # ───────────────────────────────────────────────────────────────
 # Load Model
 # ───────────────────────────────────────────────────────────────
+
+if not MODEL_PATH.exists():
+    raise RuntimeError("model.pkl not found — deployment misconfigured")
 
 with open(MODEL_PATH, "rb") as f:
     MODEL = pickle.load(f)
@@ -67,47 +81,29 @@ async def predictions():
             "snow_day_probability": float(odds)
         })
 
-    counter_value = update_counter()
-    print(counter_value)
-
     return results
+
+COUNTER = {
+    "value": 0,
+    "last_date": None,
+    "hour": None
+}
 
 @app.get("/count")
 async def update_counter():
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    hour_str = datetime.now().strftime("%H")
+    now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    hour = now.hour
 
-    # Create CSV if not exists
-    if not COUNTER_PATH.exists():
-        df = pd.DataFrame({"value": [1], "last_changed_date": [today_str], "hour": [hour_str]})
-        df.to_csv(COUNTER_PATH, index=False)
-        return 1
+    # Reset if new day or before school hours
+    if COUNTER["last_date"] != today_str or (COUNTER["hour"] is not None and COUNTER["hour"] < 7):
+        COUNTER["value"] = 0
+        COUNTER["last_date"] = today_str
 
-    # Read existing
-    df = pd.read_csv(COUNTER_PATH)
+    COUNTER["hour"] = hour
+    COUNTER["value"] += 1
 
-    value = int(df.loc[0, "value"])
-    last_date = str(df.loc[0, "last_changed_date"])
-    hour = int(df.loc[0, "hour"])
-
-    # Reset if new day
-    if last_date != today_str or hour < 7:
-        value = 0
-        last_date = today_str
-        hour = hour_str
-
-    # Increment
-    value += 1
-
-    # Save back
-    pd.DataFrame({
-        "value": [value],
-        "last_changed_date": [today_str],
-        "hour": [hour_str]
-    }).to_csv(COUNTER_PATH, index=False)
-
-    return value
-
+    return COUNTER["value"]
 
 # ───────────────────────────────────────────────────────────────
 # Helpers
