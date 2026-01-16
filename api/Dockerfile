@@ -1,10 +1,10 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /app/api
 
-COPY requirements.txt ./requirements.txt
+COPY . .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8080
-
-CMD ["python", "api/main.py"]
+CMD ["python", "main.py"]
