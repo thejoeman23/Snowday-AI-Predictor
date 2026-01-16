@@ -10,6 +10,7 @@ LONGITUDE = -81.98
 
 BASE_DIR = Path(__file__).resolve().parent
 CSV_PATH = BASE_DIR / "data" / "snow_day_dates.csv"
+SNOW_DAYS = pd.read_csv(CSV_PATH)
 
 # ----------------------------------------
 
