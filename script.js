@@ -1,5 +1,5 @@
-const predictApi = "https://api.snowdaypredictor.io/predict";
-const counterApi = "https://api.snowdaypredictor.io/count";
+const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
+const counterApi = "https://snowday-ai-predictor.fly.dev/count";
 
 function updateProbabilities(list) {
     document.querySelector(".current-percent").textContent =
