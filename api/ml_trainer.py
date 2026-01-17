@@ -86,25 +86,68 @@ def PrintFeatureImportance():
     for _, row in importance_df.head(8).iterrows():
         print(f"- {row['feature']}")
 
+def GetExplanations(data, model):
+    explainer = shap.TreeExplainer(
+        model,
+        model_output="raw"
+    )
+
+    for i in data.index:
+        row = data.loc[[i]]  # <-- keep 2D
+
+        shap_values = explainer(row)
+
+        exp = shap.Explanation(
+            values=shap_values.values[0, :, 1],
+            base_values=shap_values.base_values[0, 1],
+            data=row.iloc[0],
+            feature_names=row.columns
+        )
+
+        # Zip everything together
+        items = list(zip(
+            exp.feature_names,
+            exp.values,
+            exp.data
+        ))
+
+        # Sort by absolute SHAP value (descending)
+        items_sorted = sorted(
+            items,
+            key=lambda x: abs(x[1]),
+            reverse=True
+        )
+
+        top = items_sorted[:3]
+
+        clean_top = [
+            {
+                "feature": name,
+                "impact": round(float(shap_val), 3),
+                "value": round(float(value), 2),
+                "direction": "up" if shap_val > 0 else "down"
+            }
+            for name, shap_val, value in top
+        ]
+        print(clean_top)
+
+
+
+        
+
 def Test(data):
 
     # features used by the model
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
     # load model
-    with open("../app/model.pkl", "rb") as f:
+    with open("../api/model.pkl", "rb") as f:
         MODEL = pickle.load(f)
+
+    GetExplanations(X, MODEL)
 
     # predicted probability of snow day
     probs = MODEL.predict_proba(X)[:, 1]
-
-    # ---- SHAP EXPLAINER ----
-    explainer = shap.TreeExplainer(MODEL)
-
-    # shap_values shape: [n_samples, n_features]
-    shap_values = explainer.shap_values(X)[1]  # class 1 = snow day
-
-    feature_names = X.columns.tolist()
 
     results = data.copy()
     results["snow_day_probability"] = probs
@@ -120,38 +163,18 @@ def Test(data):
             row["snow_day_probability"] * 100 if row.get("snowfall_24h", 0) != 0 else 0.01
         )
 
-        # shap values for this prediction
-        contrib = shap_values[i]
-
-        # most important = largest absolute SHAP
-        order = np.argsort(np.abs(contrib))[::-1]
-        top3_idx = order[:3]
-
-        # build readable bullet points
-        explanations = []
-        for j in top3_idx:
-            feat = feature_names[j]
-            val = row[feat]
-            direction = "increased" if contrib[j] > 0 else "reduced"
-            explanations.append(f"{feat} = {val} ({direction} chance)")
-
-        # ---- PRINT RESULT ----
         print(
             f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day "
             f"(so {'yes' if odds > 50 else 'no'})"
         )
 
-        print("  Top factors:")
-        for e in explanations:
-            print("   •", e)
-
         print()
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("../data/training_dataset_1.csv")
+#TRAINING_DATA = pd.read_csv("../data/training_dataset_1.csv")
 TESTING_DATA = weather.t()
 
-Train(TRAINING_DATA)
-PrintFeatureImportance()
+#Train(TRAINING_DATA)
+#PrintFeatureImportance()
 Test(TESTING_DATA)

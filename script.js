@@ -33,7 +33,7 @@ function updateOdometer(el, newValue) {
 
 function updateProbabilities(list) {
   // Current day
-  const currentPercentEl = document.querySelector(".current-percent");
+  const currentPercentEl = document.querySelector(".odometer");
   const currentLabelEl = document.querySelector(".current-label");
 
   updateOdometer(
@@ -43,7 +43,7 @@ function updateProbabilities(list) {
   currentLabelEl.textContent = list[0].weekday;
 
   // Other days
-  const metricValues = document.querySelectorAll(".metric-value");
+  const metricValues = document.querySelectorAll(".metric-value .odometer");
   const metricLabels = document.querySelectorAll(".metric-label");
 
   for (let i = 1; i < list.length; i++) {
@@ -60,7 +60,7 @@ function updateProbabilities(list) {
 }
 
 function updateOthers(value) {
-  const othersEl = document.querySelector(".others-amount");
+  const othersEl = document.querySelector(".others-amount .odometer");
   updateOdometer(othersEl, Number(value));
 }
 

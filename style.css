@@ -130,13 +130,18 @@ body {
   font-weight: bold;
   color: var(--text-white);
   letter-spacing: -0.04em;
+
+  display: inline-flex;
+  align-items: baseline; /* aligns % nicely */
+  gap: 0.08em;           /* controls spacing */
+
+  margin-bottom: -5px;
 }
 
-.current-percent-sign {
-  font-size: clamp(var(--fs-tomorrow-min), 12vw, var(--fs-tomorrow-max));
+.percent-sign {
+  font-size: .93em;     /* % should be smaller */
   font-weight: bold;
-  color: var(--text-white);
-  letter-spacing: -0.04em;
+  margin-left: -5px;
 }
 
 .current-label {
@@ -146,6 +151,16 @@ body {
   letter-spacing: -0.02em;
   margin-top: clamp(-20px, -4vw, -30px);
 }
+
+.odometer-digit {
+  margin-bottom: 6px;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.odometer-digit:last-child {
+  margin-right: 0;
+}
+
 
 /* Reasons */
 
@@ -260,6 +275,17 @@ body {
 }
 
 .metric-value {
+  font-size: clamp(var(--fs-metric-value-min), 8vw, var(--fs-metric-value-max));
+  font-weight: bold;
+  color: var(--text-white);
+  letter-spacing: -0.04em;
+
+  display: inline-flex;
+  align-items: baseline; /* aligns % nicely */
+  gap: 0.08em;           /* controls spacing */
+}
+
+.metric-value-icon {
   font-size: clamp(var(--fs-metric-value-min), 8vw, var(--fs-metric-value-max));
   font-weight: bold;
   color: var(--text-white);
