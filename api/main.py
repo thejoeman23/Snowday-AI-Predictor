@@ -66,12 +66,6 @@ async def predictions():
     probs = MODEL.predict_proba(X)[:, 1]
     data["snow_day_probability"] = probs
 
-    print("BEFORE SHAP")
-    all_explanations = await run_in_threadpool(
-        GetExplanations, X, MODEL
-    )
-    print("AFTER SHAP")
-
     results = []
     for i, row in data.iterrows():
         weekday = describe_day(row["date"])
