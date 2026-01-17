@@ -13,6 +13,8 @@ import pandas as pd
 
 import weather_fetcher
 
+from explainer import GetExplanations
+
 # ───────────────────────────────────────────────────────────────
 # App + Paths
 # ───────────────────────────────────────────────────────────────
@@ -70,15 +72,22 @@ async def predictions():
     probs = MODEL.predict_proba(X)[:, 1]
     data["snow_day_probability"] = probs
 
+    all_explanations = GetExplanations(X, MODEL)
+
     results = []
-    for _, row in data.iterrows():
+    for i, row in data.iterrows():
         weekday = describe_day(row["date"])
-        odds = row["snow_day_probability"] * 100 if row.get("snowfall_24h", 0) != 0 else 0
-        odds = round(odds, None)
+        odds = int(round(row["snow_day_probability"] * 100))
+        explanations = all_explanations[i]
 
         results.append({
             "weekday": weekday,
-            "snow_day_probability": float(odds)
+            "snow_day_probability": float(odds),
+            "explanations": [
+                { "explanation": explanation["humanized_value"] }
+                for explanation in explanations
+                if explanation["humanized_value"] is not None
+            ]
         })
 
     return results

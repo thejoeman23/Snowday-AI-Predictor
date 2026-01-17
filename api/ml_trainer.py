@@ -3,11 +3,11 @@ import numpy as np
 import pickle
 import weather_fetcher as weather
 
+from explainer import GetExplanations
+
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
-
-import shap
 
 # ---------------- CONFIG ----------------
 
@@ -84,56 +84,7 @@ def PrintFeatureImportance():
 
     print("\nTOP FACTORS THE MODEL USES:")
     for _, row in importance_df.head(8).iterrows():
-        print(f"- {row['feature']}")
-
-def GetExplanations(data, model):
-    explainer = shap.TreeExplainer(
-        model,
-        model_output="raw"
-    )
-
-    for i in data.index:
-        row = data.loc[[i]]  # <-- keep 2D
-
-        shap_values = explainer(row)
-
-        exp = shap.Explanation(
-            values=shap_values.values[0, :, 1],
-            base_values=shap_values.base_values[0, 1],
-            data=row.iloc[0],
-            feature_names=row.columns
-        )
-
-        # Zip everything together
-        items = list(zip(
-            exp.feature_names,
-            exp.values,
-            exp.data
-        ))
-
-        # Sort by absolute SHAP value (descending)
-        items_sorted = sorted(
-            items,
-            key=lambda x: abs(x[1]),
-            reverse=True
-        )
-
-        top = items_sorted[:3]
-
-        clean_top = [
-            {
-                "feature": name,
-                "impact": round(float(shap_val), 3),
-                "value": round(float(value), 2),
-                "direction": "up" if shap_val > 0 else "down"
-            }
-            for name, shap_val, value in top
-        ]
-        print(clean_top)
-
-
-
-        
+        print(f"- {row['feature']}")        
 
 def Test(data):
 
@@ -144,7 +95,7 @@ def Test(data):
     with open("../api/model.pkl", "rb") as f:
         MODEL = pickle.load(f)
 
-    GetExplanations(X, MODEL)
+    explanations = GetExplanations(X, MODEL)
 
     # predicted probability of snow day
     probs = MODEL.predict_proba(X)[:, 1]
@@ -168,12 +119,20 @@ def Test(data):
             f"(so {'yes' if odds > 50 else 'no'})"
         )
 
+        print("Top factors:")
+        for factor in explanations[i]:
+            direction = "increasing" if factor["direction"] == "up" else "decreasing"
+            print(
+                f" - {factor['humanized_value']}: {factor['value']} "
+                f"({factor['impact']} impact, {direction} chance)"
+            )
+
         print()
 
 # ---------------- RUN ----------------
 
 #TRAINING_DATA = pd.read_csv("../data/training_dataset_1.csv")
-TESTING_DATA = weather.t()
+TESTING_DATA = weather.get_this_weeks_data()
 
 #Train(TRAINING_DATA)
 #PrintFeatureImportance()
