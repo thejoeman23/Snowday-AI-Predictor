@@ -54,10 +54,13 @@ with open(MODEL_PATH, "rb") as f:
 # Routes
 # ───────────────────────────────────────────────────────────────
 
+
 @app.get("/predict")
 async def predictions():
     # Get prediction data
+    global data 
     data = weather_fetcher.get_this_weeks_data()
+
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
     probs = MODEL.predict_proba(X)[:, 1]
@@ -74,11 +77,26 @@ async def predictions():
         weekday = describe_day(row["date"])
         odds = int(round(row["snow_day_probability"] * 100))
 
-        explanations = all_explanations[i]
-
         results.append({
             "weekday": weekday,
             "snow_day_probability": float(odds),
+        })
+
+    return results
+
+@app.get("/explain")
+async def explain():
+    X = data.drop(columns=["date", "snow_day"], errors="ignore")
+
+    all_explanations = await run_in_threadpool(
+        GetExplanations, X, MODEL
+    )
+
+    results = []
+    for i, row in data.iterrows():
+        explanations = all_explanations[i]
+        results.append({
+            "weekday": describe_day(row["date"]),
             "explanations": [
                 { "explanation": explanation["humanized_value"] }
                 for explanation in explanations
@@ -87,12 +105,6 @@ async def predictions():
         })
 
     return results
-
-COUNTER = {
-    "value": 0,
-    "last_date": None,
-    "hour": None
-}
 
 @app.get("/count")
 async def update_counter():
