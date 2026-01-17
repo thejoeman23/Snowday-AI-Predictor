@@ -81,8 +81,7 @@ async def predictions():
 @app.get("/explain")
 async def explain():
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
-    X = X.iloc[:2]  # Today + Tomorrow
-
+    X = X.iloc[:1]  # Today + Tomorrow
 
     all_explanations = await run_in_threadpool(
         GetExplanations, X, MODEL
@@ -101,6 +100,12 @@ async def explain():
         })
 
     return results
+
+COUNTER = {
+    "value": 0,
+    "last_date": None,
+    "hour": None
+}
 
 @app.get("/count")
 async def update_counter():
