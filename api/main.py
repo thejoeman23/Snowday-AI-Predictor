@@ -25,16 +25,6 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "model.pkl"
 COUNTER_PATH = BASE_DIR / "counter.csv"
 
-# ───────────────────────────────────────────────────────────────
-# Run App
-# ───────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    import os
-    import uvicorn
-
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
-
 
 # ───────────────────────────────────────────────────────────────
 # Allowing
@@ -138,3 +128,13 @@ def describe_day(target_date):
         return "Tomorrow"
 
     return date.day_name()
+
+# ───────────────────────────────────────────────────────────────
+# Run App
+# ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
