@@ -95,7 +95,7 @@ def Test(data):
     with open("../api/model.pkl", "rb") as f:
         MODEL = pickle.load(f)
 
-    explanations = GetExplanations(X, MODEL)
+    all_explanations = GetExplanations(X, MODEL)
 
     # predicted probability of snow day
     probs = MODEL.predict_proba(X)[:, 1]
@@ -119,13 +119,14 @@ def Test(data):
             f"(so {'yes' if odds > 50 else 'no'})"
         )
 
-        print("Top factors:")
-        for factor in explanations[i]:
-            direction = "increasing" if factor["direction"] == "up" else "decreasing"
-            print(
-                f" - {factor['humanized_value']}: {factor['value']} "
-                f"({factor['impact']} impact, {direction} chance)"
-            )
+        explanations = all_explanations[i]
+        
+        explanation_list = [
+                { "explanation": explanation["humanized_value"] }
+                for explanation in explanations
+            ]
+        print("  Top factors:")
+        print(" ", explanation_list)
 
         print()
 

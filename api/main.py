@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import HTMLResponse
 from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
@@ -62,12 +63,13 @@ async def predictions():
     probs = MODEL.predict_proba(X)[:, 1]
     data["snow_day_probability"] = probs
 
-    all_explanations = GetExplanations(X, MODEL)
+    all_explanations = await run_in_threadpool(GetExplanations, X, MODEL)
 
     results = []
     for i, row in data.iterrows():
         weekday = describe_day(row["date"])
         odds = int(round(row["snow_day_probability"] * 100))
+
         explanations = all_explanations[i]
 
         results.append({
