@@ -70,7 +70,6 @@ function updateOthers(value) {
 
 const cachedCounter = localStorage.getItem("counter_value");
 if (cachedCounter !== null) {
-  updateOthers(Number(cachedCounter));
 }
 
 const cachedPredictions = localStorage.getItem("snowday_predictions");
@@ -86,7 +85,9 @@ fetch(predictApi)
   .then(r => r.ok ? r.json() : Promise.reject())
   .then(data => {
     localStorage.setItem("snowday_predictions", JSON.stringify(data));
-    updateProbabilities(data);
+    setTimeout(function(){
+      updateProbabilities(data);
+    }, 2000);
   })
   .catch(console.error);
 
@@ -94,7 +95,10 @@ fetch(counterApi)
   .then(r => r.ok ? r.text() : Promise.reject())
   .then(counter => {
     localStorage.setItem("counter_value", counter);
-    updateOthers(Number(counter));
+    setTimeout(function(){
+      updateOthers(Number(counter));
+    }, 2000);
+
   })
   .catch(console.error);
 
