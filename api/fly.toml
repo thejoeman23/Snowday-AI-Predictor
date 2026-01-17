@@ -11,3 +11,7 @@ primary_region = "yyz"
   auto_stop_machines = true
   min_machines_running = 1
 
+[env]
+  NUMBA_DISABLE_JIT = "1"
+
+

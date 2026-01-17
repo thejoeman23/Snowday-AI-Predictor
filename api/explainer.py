@@ -1,7 +1,6 @@
-import shap
-import pandas as pd
 
 def GetExplanations(data, model):
+    import shap
 
     explainer = shap.TreeExplainer(
         model,
