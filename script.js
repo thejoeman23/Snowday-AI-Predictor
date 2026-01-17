@@ -70,6 +70,7 @@ function updateOthers(value) {
 
 const cachedCounter = localStorage.getItem("counter_value");
 if (cachedCounter !== null) {
+  updateOthers(Number(cachedCounter));
 }
 
 const cachedPredictions = localStorage.getItem("snowday_predictions");
