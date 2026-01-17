@@ -54,11 +54,9 @@ with open(MODEL_PATH, "rb") as f:
 # Routes
 # ───────────────────────────────────────────────────────────────
 
-
 @app.get("/predict")
 async def predictions():
     # Get prediction data
-    global data 
     data = weather_fetcher.get_this_weeks_data()
 
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
@@ -80,6 +78,8 @@ async def predictions():
 
 @app.get("/explain")
 async def explain():
+    data = weather_fetcher.get_this_weeks_data()
+
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
     X = X.iloc[:1]  # Today + Tomorrow
 
