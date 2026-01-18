@@ -128,7 +128,7 @@ async def update_counter():
 def describe_day(target_date):
     tz = "America/Toronto"  # change if needed
 
-    date = target_date
+    date = target_date.strftime("%Y-%m-%d")
     today = date.strftime("%Y-%m-%d")
 
     diff = (date - today).days
