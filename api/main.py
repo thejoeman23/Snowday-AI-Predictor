@@ -83,9 +83,7 @@ async def explain():
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
     X = X.iloc[:1]  # Today + Tomorrow
 
-    all_explanations = await run_in_threadpool(
-        GetExplanations, X, MODEL
-    )
+    all_explanations = GetExplanations(X, MODEL)
 
     results = []
     for i, row in data.iterrows():
