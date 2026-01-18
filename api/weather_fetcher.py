@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 # ---------------- CONFIG ----------------
@@ -202,35 +203,27 @@ def t() -> pd.DataFrame:
     )
 
 def get_this_weeks_data() -> pd.DataFrame:
-    """Return 5 weekdays starting today (before 8am) or tomorrow (after 8am)."""
-
-    now = datetime.now()
+    tz = ZoneInfo("America/Toronto")
+    now = datetime.now(tz)
     today = now.date()
 
-    # Decide the starting date
     start = today if now.hour < 7 else today + timedelta(days=1)
 
     dates = []
     current = start
 
     while len(dates) < 5:
-        if current.weekday() < 5:  # Mon-Fri
-            dates.append(current.strftime("%Y-%m-%d"))
+        if current.weekday() < 5:
+            dates.append(current.isoformat())
         current += timedelta(days=1)
 
-    # --- One fetch instead of five ---
-    start_str = dates[0]
-    end_str   = dates[-1]
-
     df = get_data_within_timerange(
-        start_str,
-        end_str,
+        dates[0],
+        dates[-1],
         use_forecast=True
     )
 
-    # Keep only needed rows
     df = df[df["date"].isin(dates)]
-
     return df.reset_index(drop=True)
 
 def get_todays_data() -> pd.DataFrame:

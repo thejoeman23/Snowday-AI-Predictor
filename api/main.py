@@ -1,11 +1,6 @@
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import HTMLResponse
-from fastapi.requests import Request
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 
 from datetime import datetime, timedelta
 
@@ -15,6 +10,8 @@ import pandas as pd
 import weather_fetcher
 
 from explainer import GetExplanations
+
+from zoneinfo import ZoneInfo
 
 # ───────────────────────────────────────────────────────────────
 # App + Paths
@@ -125,11 +122,11 @@ async def update_counter():
 # Helpers
 # ───────────────────────────────────────────────────────────────
 
-def describe_day(target_date):
-    tz = "America/Toronto"  # change if needed
+def describe_day(target_date, now):
+    date = pd.to_datetime(target_date).date()
+    today = now.date()
 
-    date = pd.to_datetime(target_date).strftime("%Y-%m-%d")
-    today = pd.Timestamp.today().strftime("%Y-%m-%d")
+    now = datetime.now(ZoneInfo("America/Toronto"))
 
     diff = (date - today).days
 
@@ -138,7 +135,8 @@ def describe_day(target_date):
     if diff == 1:
         return "Tomorrow"
 
-    return date.day_name()
+    return pd.Timestamp(date).day_name()
+
 
 # ───────────────────────────────────────────────────────────────
 # Run App
