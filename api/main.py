@@ -126,16 +126,19 @@ async def update_counter():
 # ───────────────────────────────────────────────────────────────
 
 def describe_day(target_date):
-    """
-    Convert a date into a readable weekday label:
-      - today
-      - tomorrow
-      - Monday
-      - Tuesday
-      etc.
-    """
-    date = pd.to_datetime(target_date).normalize()
-    today = pd.Timestamp.today().normalize()
+    tz = "America/Toronto"  # change if needed
+
+    date = (
+        pd.to_datetime(target_date)
+        .tz_localize("UTC")        # if target_date comes from an API
+        .tz_convert(tz)
+        .normalize()
+    )
+
+    today = (
+        pd.Timestamp.now(tz)
+        .normalize()
+    )
 
     diff = (date - today).days
 
