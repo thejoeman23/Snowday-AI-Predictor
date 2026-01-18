@@ -128,8 +128,17 @@ async def update_counter():
 def describe_day(target_date):
     tz = "America/Toronto"  # change if needed
 
-    date = target_date
-    today = date.strftime("%Y-%m-%d")
+    date = (
+        pd.to_datetime(target_date)
+        .tz_localize("UTC")        # if target_date comes from an API
+        .tz_convert(tz)
+        .normalize()
+    )
+
+    today = (
+        pd.Timestamp.now(tz)
+        .normalize()
+    )
 
     diff = (date - today).days
 
