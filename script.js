@@ -1,5 +1,7 @@
 const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
 const counterApi = "https://snowday-ai-predictor.fly.dev/count";
+const explainerApi = "https://snowday-ai-predictor.fly.dev/explain";
+
 
 /* -------------------------
    ODOMETER REGISTRY
@@ -64,6 +66,13 @@ function updateOthers(value) {
   updateOdometer(othersEl, Number(value));
 }
 
+function updateExplainer(list) {
+  const explainerElmts = document.querySelectorAll(".reason");
+  for (let i = 0; i < list.length; i++){
+    explainerElmts[i].textContent = list[i].reason;
+  }
+}
+
 /* -------------------------
    CACHE FIRST
 -------------------------- */
@@ -76,6 +85,11 @@ if (cachedCounter !== null) {
 const cachedPredictions = localStorage.getItem("snowday_predictions");
 if (cachedPredictions) {
   updateProbabilities(JSON.parse(cachedPredictions));
+}
+
+const cachedExplanations = localStorage.getItem("prediction_explanations");
+if (cachedExplanations) {
+  updateExplainer(JSON.parse(cachedExplanations));
 }
 
 /* -------------------------
@@ -92,12 +106,22 @@ fetch(predictApi)
   })
   .catch(console.error);
 
+fetch(explainerApi)
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(data => {
+    localStorage.setItem("prediction_explanations", JSON.stringify(data));
+    setTimeout(function(){
+      updateExplainer(data);
+    }, 2000);
+  })
+  .catch(console.error);
+
 fetch(counterApi)
   .then(r => r.ok ? r.text() : Promise.reject())
   .then(counter => {
     localStorage.setItem("counter_value", counter);
     setTimeout(function(){
-      updateOthers(Number(counter));
+      updateOthers(Number(counter))
     }, 2000);
 
   })
