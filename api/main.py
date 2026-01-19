@@ -82,6 +82,8 @@ async def explain():
 
     all_explanations = GetExplanations(X, MODEL)
 
+    print(all_explanations)
+
     results = []
     for i, row in data.iterrows():
         explanations = all_explanations[i]
