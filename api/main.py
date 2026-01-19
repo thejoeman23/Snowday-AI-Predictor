@@ -81,19 +81,18 @@ async def explain():
     X = X.iloc[:1]  # explain today only
 
     all_explanations = GetExplanations(X, MODEL)
-    explanations = all_explanations[0]  # explain today only
+    explanations = all_explanations[0]  # list of explanation dicts
 
     results = []
 
-    # ONLY iterate over explained rows
-    for i in explanations:
-        explanation = explanations[i]
-
-        results.append({
-            "reason": explanation["humanized_value"]
-        })
+    for explanation in explanations:
+        if explanation["humanized_value"] is not None:
+            results.append({
+                "reason": explanation["humanized_value"]
+            })
 
     return results
+
 
 COUNTER = {
     "value": 0,
