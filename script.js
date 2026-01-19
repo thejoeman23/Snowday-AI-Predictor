@@ -128,12 +128,12 @@ fetch(predictApi)
 
 fetch(explainerApi)
   .then(r => r.ok ? r.json() : Promise.reject())
-  .then(data => {
-    if (JSON.stringify(data) != cachedExplanations)
+  .then(reasons => {
+    if (JSON.stringify(reasons) != cachedExplanations)
     {
-      localStorage.setItem("prediction_explanations", JSON.stringify(data));
+      localStorage.setItem("prediction_explanations", JSON.stringify(reasons));
       setTimeout(function(){
-        updateProbabilities(data);
+        updateExplainer(reasons);
       }, 2000);
     }
   })
