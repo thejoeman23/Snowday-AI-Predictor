@@ -106,15 +106,20 @@ async def update_counter():
     today_str = now.strftime("%Y-%m-%d")
     hour = now.hour
 
-    # Reset if new day or before school hours
-    if COUNTER["last_date"] != today_str or (COUNTER["hour"] is not None and COUNTER["hour"] < 7):
+    # Reset if new day
+    if COUNTER["last_date"] != today_str:
         COUNTER["value"] = 0
         COUNTER["last_date"] = today_str
+
+    # Reset ONCE when crossing before → after school start
+    elif COUNTER["hour"] is not None and COUNTER["hour"] < 7 and hour >= 7:
+        COUNTER["value"] = 0
 
     COUNTER["hour"] = hour
     COUNTER["value"] += 1
 
     return COUNTER["value"]
+
 
 # ───────────────────────────────────────────────────────────────
 # Helpers

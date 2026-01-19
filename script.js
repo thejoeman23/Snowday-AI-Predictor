@@ -71,7 +71,27 @@ function updateExplainer(list) {
   for (let i = 0; i < list.length; i++){
     explainerElmts[i].textContent = list[i].reason;
   }
+
+  popReasons();
 }
+
+function popReasons(containerSelector = ".reasons") {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  const items = [...container.querySelectorAll(".reason")];
+
+  // assign stagger index
+  items.forEach((el, idx) => el.style.setProperty("--i", idx));
+
+  // retrigger animation reliably
+  container.classList.remove("is-visible");
+  // force reflow so animations restart
+  void container.offsetWidth;
+
+  container.classList.add("is-visible");
+}
+
 
 /* -------------------------
    CACHE FIRST
@@ -109,10 +129,13 @@ fetch(predictApi)
 fetch(explainerApi)
   .then(r => r.ok ? r.json() : Promise.reject())
   .then(data => {
-    localStorage.setItem("prediction_explanations", JSON.stringify(data));
-    setTimeout(function(){
-      updateExplainer(data);
-    }, 2000);
+    if (JSON.stringify(data) != cachedExplanations)
+    {
+      localStorage.setItem("prediction_explanations", JSON.stringify(data));
+      setTimeout(function(){
+        updateProbabilities(data);
+      }, 2000);
+    }
   })
   .catch(console.error);
 
