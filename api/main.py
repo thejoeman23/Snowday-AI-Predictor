@@ -78,18 +78,19 @@ async def explain():
     data = weather_fetcher.get_this_weeks_data()
 
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
-    X = X.iloc[:1]  # Today + Tomorrow
+    X = X.iloc[:1]  # explain today only
 
     all_explanations = GetExplanations(X, MODEL)
 
-    print(all_explanations)
-
     results = []
-    for i, row in data.iterrows():
+
+    # ONLY iterate over explained rows
+    for i in all_explanations:
         explanations = all_explanations[i]
+
         results.append({
             "explanations": [
-                { "explanation": explanation["humanized_value"] }
+                {"explanation": explanation["humanized_value"]}
                 for explanation in explanations
                 if explanation["humanized_value"] is not None
             ]
