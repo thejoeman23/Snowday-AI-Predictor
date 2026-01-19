@@ -86,7 +86,6 @@ async def explain():
     for i, row in data.iterrows():
         explanations = all_explanations[i]
         results.append({
-            "weekday": describe_day(row["date"]),
             "explanations": [
                 { "explanation": explanation["humanized_value"] }
                 for explanation in explanations
@@ -122,11 +121,11 @@ async def update_counter():
 # Helpers
 # ───────────────────────────────────────────────────────────────
 
-def describe_day(target_date, now):
+def describe_day(target_date):
+    now = datetime.now(ZoneInfo("America/Toronto"))
+
     date = pd.to_datetime(target_date).date()
     today = now.date()
-
-    now = datetime.now(ZoneInfo("America/Toronto"))
 
     diff = (date - today).days
 
@@ -136,7 +135,6 @@ def describe_day(target_date, now):
         return "Tomorrow"
 
     return pd.Timestamp(date).day_name()
-
 
 # ───────────────────────────────────────────────────────────────
 # Run App
