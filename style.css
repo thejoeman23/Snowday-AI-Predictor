@@ -101,6 +101,7 @@ body.sandstorm-active {
   border-color: transparent;
   text-align: center;
   min-height: 1px;
+  outline: none;
 }
 
 .subtitle {
