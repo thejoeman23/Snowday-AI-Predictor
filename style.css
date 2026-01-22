@@ -1,7 +1,7 @@
 :root {
   /* COLORS */
   --bg: linear-gradient(180deg, #2c2929, #000000);
-  --card-bg: #22222283;
+  --card-bg: #222222dd;
   --text-white: #ffffff;
   --text-muted: #636363;
   --accent: #59A6F7;
@@ -53,7 +53,14 @@ body {
   display: flex;
   flex-direction: column;
 
-  background: var(--bg);
+  background: var(--bg)
+}
+
+body.sandstorm-active {
+  background: url("images/Sandstorm.gif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* PAGE LAYOUT */
@@ -89,13 +96,18 @@ body {
   color: var(--text-white);
   margin-top: -5px;
   letter-spacing: -0.04em;
+
+  background-color: transparent;
+  border-color: transparent;
+  text-align: center;
+  min-height: 1px;
 }
 
 .subtitle {
   font-size: clamp(var(--fs-title-min), 6vw, var(--fs-title-max));
   font-weight: 700;
   color: var(--text-muted);
-  margin-top: -5px;
+  margin-top: -50px;
   letter-spacing: -0.04em;
 }
 
@@ -113,9 +125,9 @@ body {
   position: relative;
 
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 

@@ -39,7 +39,7 @@
   <main class="page">
     <header class="header">
       <h1 class="location">Owen Sound</h1>
-      <h2 class="title">Snow Day Predictor.</h2>
+      <textarea class="title">Snow Day Predictor.</textarea>
       <p class="subtitle">Hoping for a snow day?</p>
     </header>
 
@@ -151,6 +151,44 @@
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/odometer.min.js" integrity="sha512-v3fZyWIk7kh9yGNQZf1SnSjIxjAKsYbg6UQ+B+QxAZqJQLrN3jMjrdNwcxV6tis6S0s1xyVDZrDz9UoRLfRpWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="script.js?v=01-18.3-2026"></script>
+    <script>
+      function makeZeroPredictionData() {
+        return [
+          { snow_day_probability: 0, weekday: "Tomorrow" },
+          { snow_day_probability: 0, weekday: "Monday" },
+          { snow_day_probability: 0, weekday: "Tuesday" },
+          { snow_day_probability: 0, weekday: "Wednesday" },
+          { snow_day_probability: 0, weekday: "Thursday" }
+        ];
+      }
 
+      function makeZeroExplainerData(count) {
+        return Array.from({ length: count }, () => ({
+          reason: "😭"
+        }));
+      }
+    </script>
+
+    <script>
+      const titleElement = document.querySelector(".title");
+
+      titleElement.addEventListener("input", () => {
+        if (titleElement.value === "Sand Day Predictor.") {
+          document.body.classList.add("sandstorm-active");
+
+          // Zero probabilities
+          const zeroList = makeZeroPredictionData();
+          updateProbabilities(zeroList);
+
+          // Zero "others hoping"
+          updateOthers(3523412);
+
+          // Clear explainer text
+          const explainerCount = document.querySelectorAll(".reason").length;
+          const zeroExplainers = makeZeroExplainerData(explainerCount);
+          updateExplainer(zeroExplainers);
+        }
+      });
+    </script>
 </body>
 </html>
