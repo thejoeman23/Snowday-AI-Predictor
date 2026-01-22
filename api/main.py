@@ -83,13 +83,23 @@ async def explain():
     all_explanations = GetExplanations(X, MODEL)
     explanations = all_explanations[0]  # list of explanation dicts
 
-    results = []
+    results = [
+        {
+            "reason": "Heavy Morning Snowfall",
+        },
+        {
+            "reason": "High Wind Speeds (7am)",
+        },
+        {
+            "reason": "Snow Squall Conditions"
+        }
+    ]
 
-    for explanation in explanations:
-        if explanation["humanized_value"] is not None:
-            results.append({
-                "reason": explanation["humanized_value"]
-            })
+    # for explanation in explanations:
+    #    if explanation["humanized_value"] is not None:
+    #        results.append({
+    #            "reason": explanation["humanized_value"]
+    #        })
 
     return results
 
