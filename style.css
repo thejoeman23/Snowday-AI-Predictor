@@ -28,7 +28,7 @@
   --fs-metric-label-min: 14px;
   --fs-metric-label-max: 22px;
 
-  --fs-others-label-min: 10px;
+  --fs-others-label-min: 12px;
   --fs-others-label-max: 20px;
 }
 
@@ -369,6 +369,30 @@ body.sandstorm-active {
   letter-spacing: -0.02em;
   margin-top: clamp(-20px, -4vw, -30px);
   text-align: center;
+}
+
+.others-amount .odometer-digit {
+  font-family: "Inter", system-ui, sans-serif;
+  margin-bottom: 3px;
+}
+
+@media (max-width: 600px) {
+  .others-amount .odometer-digit {
+    font-family: "Inter", system-ui, sans-serif;
+    margin-bottom: 1px;
+  }
+
+  .others {
+    position: relative;  /* << frees layout, floats it */
+    top: 0;
+    right: 0;
+    margin-left: 0;
+    align-self: center;
+    display: flex;
+    width: auto;
+    margin-top: 0px;
+    margin-right: 0px; 
+  }
 }
 
 /* DIVIDER */
