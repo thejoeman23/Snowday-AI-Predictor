@@ -132,9 +132,9 @@ def Test(data):
 
 # ---------------- RUN ----------------
 
-#TRAINING_DATA = pd.read_csv("../data/training_dataset_1.csv")
+TRAINING_DATA = pd.read_csv("data/training_dataset_1.csv")
 TESTING_DATA = weather.get_this_weeks_data()
 
-#Train(TRAINING_DATA)
-#PrintFeatureImportance()
+Train(TRAINING_DATA)
+PrintFeatureImportance()
 Test(TESTING_DATA)

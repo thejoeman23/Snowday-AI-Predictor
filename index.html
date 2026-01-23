@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-    <!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LG0151NMW0"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -38,11 +37,36 @@
 <body>
   <main class="page">
     <header class="header">
-      <h1 class="location">Owen Sound</h1>
-      <textarea class="title">Snow Day Predictor.</textarea>
+      <div class="city-search">
+        <img class="location-icon" src="images/Search.png" alt="Search" />
+
+        <div class="input-wrap">
+          <input
+            id="ghostInput"
+            class="location ghost"
+            type="text"
+            autocorrect="off"
+            tabindex="-1"
+            readonly
+          />
+          <input
+            id="cityInput"
+            class="location real"
+            type="text"
+            name="city-search"
+            placeholder="Enter your city"
+
+            autocomplete="new-password"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+
+      <h2 class="title">Snow Day Predictor.</h2>
       <p class="subtitle">Hoping for a snow day?</p>
     </header>
-
     <section class="card">
       <!-- Top -->
       <div class="current">
@@ -132,63 +156,24 @@
     </section>
   </main>
   <footer class="footer">
-      <div class="footer-inner">
-        <h2 class="footer-title">Support • Feedback • Suggestions • Questions</h2>
+    <div class="footer-inner">
+      <h2 class="footer-title">Support • Feedback • Suggestions • Questions</h2>
 
-        <textarea
-          class="suggest-box"
-          id="feedbackBox"
-          placeholder="Type your message here…"
-        ></textarea>
+      <textarea
+        class="suggest-box"
+        id="feedbackBox"
+        placeholder="Type your message here…"
+      ></textarea>
 
-        <button class="suggest-btn" id="submitFeedback">
-          Submit
-        </button>
+      <button class="suggest-btn" id="submitFeedback">
+        Submit
+      </button>
 
-        <p class="submit-status" id="submitStatus"></p>
+      <p class="submit-status" id="submitStatus"></p>
 
-      </div>
-    </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/odometer.min.js" integrity="sha512-v3fZyWIk7kh9yGNQZf1SnSjIxjAKsYbg6UQ+B+QxAZqJQLrN3jMjrdNwcxV6tis6S0s1xyVDZrDz9UoRLfRpWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="script.js?v=01-18.3-2026"></script>
-    <script>
-      function makeZeroPredictionData() {
-        return [
-          { snow_day_probability: 0, weekday: "Tomorrow" },
-          { snow_day_probability: 0, weekday: "Monday" },
-          { snow_day_probability: 0, weekday: "Tuesday" },
-          { snow_day_probability: 0, weekday: "Wednesday" },
-          { snow_day_probability: 0, weekday: "Thursday" }
-        ];
-      }
-
-      function makeZeroExplainerData(count) {
-        return Array.from({ length: count }, () => ({
-          reason: "😭"
-        }));
-      }
-    </script>
-
-    <script>
-      const titleElement = document.querySelector(".title");
-
-      titleElement.addEventListener("input", () => {
-        if (titleElement.value === "Sand Day Predictor.") {
-          document.body.classList.add("sandstorm-active");
-
-          // Zero probabilities
-          const zeroList = makeZeroPredictionData();
-          updateProbabilities(zeroList);
-
-          // Zero "others hoping"
-          updateOthers(3523412);
-
-          // Clear explainer text
-          const explainerCount = document.querySelectorAll(".reason").length;
-          const zeroExplainers = makeZeroExplainerData(explainerCount);
-          updateExplainer(zeroExplainers);
-        }
-      });
-    </script>
+    </div>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.7/odometer.min.js" integrity="sha512-v3fZyWIk7kh9yGNQZf1SnSjIxjAKsYbg6UQ+B+QxAZqJQLrN3jMjrdNwcxV6tis6S0s1xyVDZrDz9UoRLfRpWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="script.js?v=01-18.3-2026"></script>
 </body>
 </html>

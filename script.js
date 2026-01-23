@@ -185,3 +185,71 @@ button.addEventListener("click", async () => {
 
   button.disabled = false;
 });
+
+/* -------------------------
+    CITY AUTOCOMPLETE
+-------------------------- */
+
+const cityInput = document.getElementById("cityInput");
+const ghostInput = document.getElementById("ghostInput");
+
+function measureTextWidth(text, referenceEl) {
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "pre";
+  span.style.font = getComputedStyle(referenceEl).font;
+  span.textContent = text || referenceEl.placeholder;
+
+  document.body.appendChild(span);
+  const width = span.offsetWidth;
+  document.body.removeChild(span);
+
+  return width;
+}
+
+function resizeSearchInput() {
+  const text = ghostInput.value || cityInput.placeholder;
+  const width = measureTextWidth(text, cityInput);
+  cityInput.style.width = `${width + 6}px`;
+}
+
+let debounceTimer;
+let suggestion = "";
+let suggestionData = null;
+
+cityInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+
+  const typed = cityInput.value;
+  ghostInput.value = typed;
+  resizeSearchInput();
+  suggestion = "";
+  suggestionData = null;
+
+  if (typed.length < 2) return;
+
+  debounceTimer = setTimeout(async () => {
+    const res = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+        typed
+      )}&count=1&language=en&format=json&countryCode=CA`
+    );
+
+    const data = await res.json();
+    if (!data.results?.length) return;
+
+    const place = data.results[0];
+    const full = `${place.name}, ${place.admin1}`;
+
+    if (full.toLowerCase().startsWith(typed.toLowerCase())) {
+      suggestion = full.slice(typed.length);
+      suggestionData = place;
+
+      ghostInput.value = typed + suggestion;
+      resizeSearchInput();
+    }
+  }, 250);
+});
+
+resizeSearchInput();
