@@ -32,7 +32,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://snowdaypredictor.io", "http://127.0.0.1:5500"],
+    allow_origins=["https://snowdaypredictor.io", "http://127.0.0.1:5500", "http://192.168.2.129:5500"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
