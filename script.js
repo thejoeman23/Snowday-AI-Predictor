@@ -108,7 +108,7 @@ cityInput.addEventListener("input", () => {
   debounceTimer = setTimeout(async () => {
     const res = await fetch(
       locationApi +
-      `name=${encodeURIComponent(typed)}&count=2&language=en&format=json&countryCode=CA`
+      `name=${encodeURIComponent(typed)}&count=10&language=en&format=json&countryCode=CA`
     );
 
     const data = await res.json();
