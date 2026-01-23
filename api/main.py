@@ -55,6 +55,7 @@ with open(MODEL_PATH, "rb") as f:
 async def predictions(lat: float, lon: float):
     # Get prediction data
     data = weather_fetcher.get_this_weeks_data(lat, lon)
+    print(lat, lon)
 
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
@@ -83,23 +84,13 @@ async def explain(lat: float, lon: float):
     all_explanations = GetExplanations(X, MODEL)
     explanations = all_explanations[0]  # list of explanation dicts
 
-    results = [
-        {
-            "reason": "Heavy Morning Snowfall",
-        },
-        {
-            "reason": "High Wind Speeds (7am)",
-        },
-        {
-            "reason": "Snow Squall Conditions"
-        }
-    ]
+    results = []
 
-    # for explanation in explanations:
-    #    if explanation["humanized_value"] is not None:
-    #        results.append({
-    #            "reason": explanation["humanized_value"]
-    #        })
+    for explanation in explanations:
+        if explanation["humanized_value"] is not None:
+            results.append({
+                "reason": explanation["humanized_value"]
+            })
 
     return results
 

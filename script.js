@@ -266,39 +266,46 @@ if (cachedExplanations) {
    FETCH FRESH DATA
 -------------------------- */
 
-fetch(predictApi)
-  .then(r => r.ok ? r.json() : Promise.reject())
-  .then(data => {
-    localStorage.setItem("snowday_predictions", JSON.stringify(data));
-    setTimeout(function(){
-      updateProbabilities(data);
-    }, 2000);
-  })
-  .catch(console.error);
+if (cachedLocationData) {
 
-fetch(explainerApi)
-  .then(r => r.ok ? r.json() : Promise.reject())
-  .then(reasons => {
-    if (JSON.stringify(reasons) != cachedExplanations)
-    {
-      localStorage.setItem("prediction_explanations", JSON.stringify(reasons));
+  const lat = JSON.parse(cachedLocationData).latitude;
+  const lon = JSON.parse(cachedLocationData).longitude;
+
+  fetch(predictApi + `?lat=${lat}&lon=${lon}`)
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      localStorage.setItem("snowday_predictions", JSON.stringify(data));
       setTimeout(function(){
-        updateExplainer(reasons);
+        updateProbabilities(data);
       }, 2000);
-    }
-  })
-  .catch(console.error);
+    })
+    .catch(console.error);
 
-fetch(counterApi)
-  .then(r => r.ok ? r.text() : Promise.reject())
-  .then(counter => {
-    localStorage.setItem("counter_value", counter);
-    setTimeout(function(){
-      updateOthers(Number(counter))
-    }, 2000);
+  fetch(explainerApi + `?lat=${lat}&lon=${lon}`)
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(reasons => {
+      if (JSON.stringify(reasons) != cachedExplanations)
+      {
+        localStorage.setItem("prediction_explanations", JSON.stringify(reasons));
+        setTimeout(function(){
+          updateExplainer(reasons);
+        }, 2000);
+      }
+    })
+    .catch(console.error);
 
-  })
-  .catch(console.error);
+  fetch(counterApi)
+    .then(r => r.ok ? r.text() : Promise.reject())
+    .then(counter => {
+      localStorage.setItem("counter_value", counter);
+      setTimeout(function(){
+        updateOthers(Number(counter))
+      }, 2000);
+
+    })
+    .catch(console.error);
+
+}
 
 /* -------------------------
    FEEDBACK SUBMISSION
