@@ -193,8 +193,7 @@ def t() -> pd.DataFrame:
     )
 
 def get_this_weeks_data(lat: float, lon: float) -> pd.DataFrame:
-    LATITUDE = lat
-    LONGITUDE = lon
+    print(lat, lon)
     
     tz = ZoneInfo("America/Toronto")
     now = datetime.now(tz)
