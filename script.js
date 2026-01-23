@@ -1,7 +1,144 @@
 const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
 const counterApi = "https://snowday-ai-predictor.fly.dev/count";
 const explainerApi = "https://snowday-ai-predictor.fly.dev/explain";
+const locationApi = "https://geocoding-api.open-meteo.com/v1/search?"
 
+/* -------------------------
+   CACHE + STARTUP
+-------------------------- */
+
+const cachedCounter = localStorage.getItem("counter_value");
+const cachedPredictions = localStorage.getItem("snowday_predictions");
+const cachedExplanations = localStorage.getItem("prediction_explanations");
+const cachedLocationData = localStorage.getItem("location_data");
+
+const cityInput = document.getElementById("cityInput");
+const ghostInput = document.getElementById("ghostInput");
+
+if (!cachedLocationData) {
+  cityInput?.focus();
+  // getLocation();
+}
+else {
+  const cachedName =
+    JSON.parse(cachedLocationData).name + ", " +
+    JSON.parse(cachedLocationData).admin1;
+
+  cityInput.value = cachedName;
+  ghostInput.value = cachedName;
+
+  requestAnimationFrame(() => {
+    resizeSearchInput();
+  });
+}
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(success, error);
+  } else { 
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+async function success(position) {
+  const { latitude, longitude } = position.coords;
+
+  try {
+    const res = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&count=1&language=en`
+    );
+
+    const data = await res.json();
+    if (!data.results || !data.results.length) return;
+
+    const location = data.results[0];
+
+    localStorage.setItem("location_data", JSON.stringify(location));
+    location.reload();
+
+  } catch (err) {
+    console.error("Failed to reverse-geocode location", err);
+  }
+}
+
+function error() { alert("Sorry, no position available."); }
+
+/* -------------------------
+    CITY AUTOCOMPLETE
+-------------------------- */
+
+function measureTextWidth(text, referenceEl) {
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "pre";
+  span.style.font = getComputedStyle(referenceEl).font;
+  span.textContent = text || referenceEl.placeholder;
+
+  document.body.appendChild(span);
+  const width = span.offsetWidth;
+  document.body.removeChild(span);
+
+  return width;
+}
+
+function resizeSearchInput() {
+  const text = ghostInput.value || cityInput.placeholder;
+  const width = measureTextWidth(text, cityInput);
+  cityInput.style.width = `${width + 6}px`;
+}
+
+requestAnimationFrame(() => {
+  resizeSearchInput();
+});
+
+let debounceTimer;
+let suggestion = "";
+let suggestionData = null;
+
+cityInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+
+  const typed = cityInput.value;
+  ghostInput.value = typed;
+  resizeSearchInput();
+  suggestion = "";
+  suggestionData = null;
+
+  if (typed.length < 2) return;
+
+  debounceTimer = setTimeout(async () => {
+    const res = await fetch(
+      locationApi +
+      `name=${encodeURIComponent(typed)}&count=2&language=en&format=json&countryCode=CA`
+    );
+
+    const data = await res.json();
+    if (!data.results?.length) return;
+
+    const place = data.results[0];
+    const full = `${place.name}, ${place.admin1}`;
+
+    if (full.toLowerCase().startsWith(typed.toLowerCase())) {
+      suggestion = full.slice(typed.length);
+      suggestionData = place;
+
+      ghostInput.value = typed + suggestion;
+      resizeSearchInput();
+    }
+  }, 250);
+});
+
+cityInput.addEventListener("keydown", (e) => {
+  if (e.key === "Tab" && suggestion || e.key === "ArrowRight" && suggestion || e.key === "Enter" && suggestion) {
+    e.preventDefault();
+    cityInput.value += suggestion;
+    suggestion = cityInput.value;
+
+    localStorage.setItem("location_data", JSON.stringify(suggestionData));
+    location.reload();
+  }
+});
 
 /* -------------------------
    ODOMETER REGISTRY
@@ -92,24 +229,28 @@ function popReasons(containerSelector = ".reasons") {
   container.classList.add("is-visible");
 }
 
-
 /* -------------------------
-   CACHE FIRST
+   APPLY CACHED UI
 -------------------------- */
 
-const cachedCounter = localStorage.getItem("counter_value");
 if (cachedCounter !== null) {
   updateOthers(Number(cachedCounter));
 }
 
-const cachedPredictions = localStorage.getItem("snowday_predictions");
 if (cachedPredictions) {
-  updateProbabilities(JSON.parse(cachedPredictions));
+  try {
+    updateProbabilities(JSON.parse(cachedPredictions));
+  } catch (e) {
+    console.error("Failed to parse cached snowday_predictions", e);
+  }
 }
 
-const cachedExplanations = localStorage.getItem("prediction_explanations");
 if (cachedExplanations) {
-  updateExplainer(JSON.parse(cachedExplanations));
+  try {
+    updateExplainer(JSON.parse(cachedExplanations));
+  } catch (e) {
+    console.error("Failed to parse cached prediction_explanations", e);
+  }
 }
 
 /* -------------------------
@@ -185,71 +326,3 @@ button.addEventListener("click", async () => {
 
   button.disabled = false;
 });
-
-/* -------------------------
-    CITY AUTOCOMPLETE
--------------------------- */
-
-const cityInput = document.getElementById("cityInput");
-const ghostInput = document.getElementById("ghostInput");
-
-function measureTextWidth(text, referenceEl) {
-  const span = document.createElement("span");
-  span.style.position = "absolute";
-  span.style.visibility = "hidden";
-  span.style.whiteSpace = "pre";
-  span.style.font = getComputedStyle(referenceEl).font;
-  span.textContent = text || referenceEl.placeholder;
-
-  document.body.appendChild(span);
-  const width = span.offsetWidth;
-  document.body.removeChild(span);
-
-  return width;
-}
-
-function resizeSearchInput() {
-  const text = ghostInput.value || cityInput.placeholder;
-  const width = measureTextWidth(text, cityInput);
-  cityInput.style.width = `${width + 6}px`;
-}
-
-let debounceTimer;
-let suggestion = "";
-let suggestionData = null;
-
-cityInput.addEventListener("input", () => {
-  clearTimeout(debounceTimer);
-
-  const typed = cityInput.value;
-  ghostInput.value = typed;
-  resizeSearchInput();
-  suggestion = "";
-  suggestionData = null;
-
-  if (typed.length < 2) return;
-
-  debounceTimer = setTimeout(async () => {
-    const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-        typed
-      )}&count=1&language=en&format=json&countryCode=CA`
-    );
-
-    const data = await res.json();
-    if (!data.results?.length) return;
-
-    const place = data.results[0];
-    const full = `${place.name}, ${place.admin1}`;
-
-    if (full.toLowerCase().startsWith(typed.toLowerCase())) {
-      suggestion = full.slice(typed.length);
-      suggestionData = place;
-
-      ghostInput.value = typed + suggestion;
-      resizeSearchInput();
-    }
-  }, 250);
-});
-
-resizeSearchInput();
