@@ -50,7 +50,7 @@ html, body {
 }
 
 body {
-  min-height: 140%;
+  height: auto;
 
   display: flex;
   flex-direction: column;
