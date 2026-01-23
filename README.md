@@ -11,23 +11,24 @@ Snow Day Predictor is a machine learning project that estimates the probability 
   <img src="images/Mobile%20Website.gif" alt="Mobile View" width="15%" />
 </p>
 
+## Features
+
+- Accurate Next-Day Snow Day Prediction
+- Next-Day Prediction Explanations
+- Long-Range Snow Day Predictions
+- Functional for all cities across Canada
+- Feedback Submission
 
 ## Upcoming Features
 
-- Prediction Explanations
-
-- Multiple Location Support
-
-- Freezing Rain Awareness
-
-- Animations
-
+- Environment Canada Weather Warning Awareness
+- Data Visualization
 
 ## Resources
 
  - [Open Meteo Weather API](https://open-meteo.com)
  - [Scikit Learn AI](https://scikit-learn.org/stable/)
- - Server Hostong with [Render](https://render.com)
+ - Server Hostong with [Fly](https://fly.io)
  - [Uptime Robot](http://uptimerobot.com)
  - Backend in Python
  - Frontend in HTML, Javascript, and CSS
