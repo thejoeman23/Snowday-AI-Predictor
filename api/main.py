@@ -52,9 +52,9 @@ with open(MODEL_PATH, "rb") as f:
 # ───────────────────────────────────────────────────────────────
 
 @app.get("/predict")
-async def predictions():
+async def predictions(lat: float, lon: float):
     # Get prediction data
-    data = weather_fetcher.get_this_weeks_data()
+    data = weather_fetcher.get_this_weeks_data(lat, lon)
 
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
 
@@ -74,8 +74,8 @@ async def predictions():
     return results
 
 @app.get("/explain")
-async def explain():
-    data = weather_fetcher.get_this_weeks_data()
+async def explain(lat: float, lon: float):
+    data = weather_fetcher.get_this_weeks_data(lat, lon)
 
     X = data.drop(columns=["date", "snow_day"], errors="ignore")
     X = X.iloc[:1]  # explain today only

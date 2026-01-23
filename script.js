@@ -102,8 +102,6 @@ cityInput.addEventListener("input", () => {
   const typed = cityInput.value;
   ghostInput.value = typed;
   resizeSearchInput();
-  suggestion = "";
-  suggestionData = null;
 
   if (typed.length < 2) return;
 
@@ -116,27 +114,38 @@ cityInput.addEventListener("input", () => {
     const data = await res.json();
     if (!data.results?.length) return;
 
-    const place = data.results[0];
-    const full = `${place.name}, ${place.admin1}`;
+    const placeData = data.results[0];
+    const fullName = `${placeData.name}, ${placeData.admin1}`;
 
-    if (full.toLowerCase().startsWith(typed.toLowerCase())) {
-      suggestion = full.slice(typed.length);
-      suggestionData = place;
+    const fullLower = fullName.toLowerCase();
+    const typedLower = typed.toLowerCase();
+
+    if (fullLower.startsWith(typedLower)) {
+      suggestion = fullName.slice(typed.length);
+      suggestionData = placeData;
 
       ghostInput.value = typed + suggestion;
       resizeSearchInput();
     }
+
   }, 250);
 });
 
 cityInput.addEventListener("keydown", (e) => {
-  if (e.key === "Tab" && suggestion || e.key === "ArrowRight" && suggestion || e.key === "Enter" && suggestion) {
-    e.preventDefault();
-    cityInput.value += suggestion;
-    suggestion = cityInput.value;
+  if (e.key === "Backspace" || e.key === "Delete") {
+    suggestion = "";
+    suggestionData = null;
+  }
 
-    localStorage.setItem("location_data", JSON.stringify(suggestionData));
-    location.reload();
+  if (e.key == "Tab" || e.key == "ArrowRight" || e.key == "Enter") {
+    if (suggestion) {
+      e.preventDefault();
+      cityInput.value += suggestion;
+      suggestion = cityInput.value;
+
+      localStorage.setItem("location_data", JSON.stringify(suggestionData));
+      location.reload();
+    }
   }
 });
 
