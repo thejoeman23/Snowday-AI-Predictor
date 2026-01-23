@@ -27,15 +27,15 @@ def safe_mean(values):
     values = [v for v in values if v is not None]
     return sum(values) / len(values) if values else 0
 
-def fetch_weather(start_date: str, end_date: str, use_forecast: bool = False) -> dict:
+def fetch_weather(start_date: str, end_date: str, lat: float, lon: float, use_forecast: bool = False) -> dict:
     if use_forecast:
         url = "https://api.open-meteo.com/v1/forecast"
     else:
         url = "https://archive-api.open-meteo.com/v1/archive"
 
     params = {
-        "latitude": LATITUDE,
-        "longitude": LONGITUDE,
+        "latitude": lat,
+        "longitude": lon,
 
         "start_date": start_date,
         "end_date": end_date,
@@ -81,14 +81,14 @@ def get_daily_for_date(daily, target_date):
     # creating a dictionary
     return {key: daily[key][day_index] for key in daily.keys()}
 
-def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool = False) -> pd.DataFrame:
+def get_data_within_timerange(start_date: str, end_date: str, lat: float, lon: float, use_forecast: bool = False,) -> pd.DataFrame:
     print("REQUESTING:", start_date, "→", end_date)
     rows = []
 
     current = datetime.fromisoformat(start_date)
     end = datetime.fromisoformat(end_date)
 
-    data = fetch_weather(start_date, end_date, use_forecast=use_forecast)
+    data = fetch_weather(start_date, end_date, use_forecast=use_forecast, lat=lat, lon=lon)
 
     hourly = data["hourly"]
     daily = data["daily"]
@@ -178,18 +178,6 @@ def get_data_within_timerange(start_date: str, end_date: str, use_forecast: bool
 
     return pd.DataFrame(rows)
 
-
-def get_last_weeks_data(use_forecast: bool = False) -> pd.DataFrame:
-    """Fetch weather data for last week (Mon–Fri)."""
-    today = datetime.today()
-    last_monday = today - timedelta(days=today.weekday() + 7)
-    last_friday = last_monday + timedelta(days=4)
-    return get_data_within_timerange(
-        last_monday.strftime("%Y-%m-%d"),
-        last_friday.strftime("%Y-%m-%d"),
-        use_forecast=use_forecast
-    )
-
 def t() -> pd.DataFrame:
     today = datetime.today()
     monday = today - timedelta(days=today.weekday())
@@ -199,6 +187,8 @@ def t() -> pd.DataFrame:
     return get_data_within_timerange(
         monday.strftime("%Y-%m-%d"),
         friday.strftime("%Y-%m-%d"),
+        lat=LATITUDE,
+        lon=LONGITUDE,
         use_forecast=True
     )
 
@@ -228,17 +218,6 @@ def get_this_weeks_data(lat: float, lon: float) -> pd.DataFrame:
 
     df = df[df["date"].isin(dates)]
     return df.reset_index(drop=True)
-
-def get_todays_data() -> pd.DataFrame:
-    """Fetch weather data for today."""
-    today_str = datetime.today().strftime("%Y-%m-%d")
-    return get_data_within_timerange(today_str, today_str, use_forecast=True)
-
-def get_tomorrows_data() -> pd.DataFrame:
-    """Fetch weather data for tomorrow."""
-    tomorrow_str = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
-    return get_data_within_timerange(tomorrow_str, tomorrow_str, use_forecast=True)
-
 
 def save_to_file(data: pd.DataFrame, filename: str):
     """Save DataFrame to CSV."""
