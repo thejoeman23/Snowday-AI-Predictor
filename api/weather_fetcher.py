@@ -212,6 +212,8 @@ def get_this_weeks_data(lat: float, lon: float) -> pd.DataFrame:
     df = get_data_within_timerange(
         dates[0],
         dates[-1],
+        lat,
+        lon,
         use_forecast=True
     )
 
