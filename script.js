@@ -138,7 +138,7 @@ cityInput.addEventListener("keydown", (e) => {
   }
 
   if (e.key == "Tab" || e.key == "ArrowRight" || e.key == "Enter") {
-    if (suggestion) {
+    if (suggestionData) {
       e.preventDefault();
       cityInput.value += suggestion;
       suggestion = cityInput.value;
