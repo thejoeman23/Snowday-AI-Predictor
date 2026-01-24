@@ -45,14 +45,14 @@ def GetExplanations(data, model):
                 "impact": round(float(shap_val), 3),
                 "value": round(float(value), 2),
                 "direction": "up" if shap_val > 0 else "down",
-                "humanized_value": HumanizeFeatureValue(name, value)
+                "humanized_value": HumanizeFeatureValue(name, value, shap_val),
             }
             for name, shap_val, value in top
         ]
 
     return explanations
 
-def HumanizeFeatureValue(feature, value):
+def HumanizeFeatureValue(feature, value, shap_value):
     """
     Convert a raw feature value into a human-friendly label.
     Uses predefined buckets for each feature.
@@ -65,7 +65,9 @@ def HumanizeFeatureValue(feature, value):
 
     for threshold, label in FEATURE_BUCKETS.get(base_feature, []):
         if value <= threshold:
-            return label if time is None else f"{label} ({time if time != 0 else 12}am)"
+            full_label = label if time is None else f"{label} at {time if time != 0 else 12}am"
+            icon = "⬆️" if shap_value > 0 else "⬇️"
+            return f"{full_label} {icon}"
 
 FEATURE_BUCKETS = {
 
