@@ -97,6 +97,8 @@ if (!cachedLocationData) {
   resizeSearchInput();
   document.querySelector(".loading-text").textContent =
     "Search for your city to get started.";
+
+  clearCache(); // Just incase they were on an old version of the site where there was caching but no location caching
 } else {
   const loc = JSON.parse(cachedLocationData);
   const name = `${loc.name}, ${loc.admin1}`;
