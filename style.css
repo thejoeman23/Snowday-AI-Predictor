@@ -9,6 +9,9 @@
   --accent-pink: #e673c6;
   --outline: rgba(255, 255, 255, 0.3);
 
+  --loading-stripe-light: rgb(23, 23, 23);
+  --loading-stripe-dark: rgb(22, 22, 22);
+
   /* FONT SIZE TOKENS */
   --fs-location-min: 16px;
   --fs-location-max: 19px;
@@ -223,7 +226,54 @@ body.sandstorm-active {
   border: 1px solid var(--outline);
 }
 
+.loading-screen {
+  position: absolute;
+  inset: 0;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0%, var(--loading-stripe-light) 0%);
+
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.loading-text {
+  font-size: clamp(16px, 4vw, 24px);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.dotdotdot::after {
+  content: '';
+  animation: dots 1.2s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+
+.loading-screen.hidden {
+  animation: loading-screen-fading 1s ease forwards;
+}
+
+@keyframes loading-screen-fading {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
 /* TOMORROW */
 
 .current {

@@ -1,96 +1,133 @@
 const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
 const counterApi = "https://snowday-ai-predictor.fly.dev/count";
 const explainerApi = "https://snowday-ai-predictor.fly.dev/explain";
-const locationApi = "https://geocoding-api.open-meteo.com/v1/search?"
+const locationApi = "https://geocoding-api.open-meteo.com/v1/search?";
+
+/* -------------------------
+   LOADING STATE
+-------------------------- */
+
+const loadingState = {
+  predictions: false,
+  explanations: false,
+  counter: false,
+  alreadyLoadedOnce: false
+};
+
+let pendingData = {
+  predictions: null,
+  explanations: null,
+  counter: null
+};
+
+function showLoadingScreen(isVisible) {
+  const el = document.querySelector(".loading-screen");
+  if (!el) return;
+  el.classList.toggle("hidden", !isVisible);
+}
+
+function allReady() {
+  return (
+    loadingState.predictions &&
+    loadingState.explanations &&
+    loadingState.counter
+  );
+}
+
+function hydrateUI() {
+  updateProbabilities(pendingData.predictions);
+  updateExplainer(pendingData.explanations);
+  updateOthers(pendingData.counter);
+}
+
+function checkLoadingComplete() {
+  if (!allReady()) return;
+
+  // First-ever render (cached or first fetch)
+  if (!loadingState.alreadyLoadedOnce) {
+    hydrateUI();
+    showLoadingScreen(false);
+    loadingState.alreadyLoadedOnce = true;
+    return;
+  }
+
+  // Subsequent fresh-data update
+  setTimeout(() => {
+    hydrateUI();
+  }, 2500);
+}
+
 
 /* -------------------------
    CACHE + STARTUP
 -------------------------- */
 
-const cachedCounter = localStorage.getItem("counter_value");
-const cachedPredictions = localStorage.getItem("snowday_predictions");
-const cachedExplanations = localStorage.getItem("prediction_explanations");
+function clearCache() {
+  localStorage.removeItem("snowday_predictions");
+  localStorage.removeItem("prediction_explanations");
+  localStorage.removeItem("counter_value");
+}
+
+const cachedPredictions = (() => {
+  const v = localStorage.getItem("snowday_predictions");
+  return v && v !== "null" ? v : null;
+})();
+
+const cachedExplanations = (() => {
+  const v = localStorage.getItem("prediction_explanations");
+  return v && v !== "null" ? v : null;
+})();
+
+const cachedCounter = (() => {
+  const v = localStorage.getItem("counter_value");
+  return v && v !== "null" ? v : null;
+})();
+
 const cachedLocationData = localStorage.getItem("location_data");
 
-const cityInput = document.getElementById("cityInput");
+const cityInput  = document.getElementById("cityInput");
 const ghostInput = document.getElementById("ghostInput");
+
+/* -------------------------
+   LOCATION HANDLING
+-------------------------- */
 
 if (!cachedLocationData) {
   cityInput?.focus();
-  // getLocation();
+  resizeSearchInput();
+  document.querySelector(".loading-text").textContent =
+    "Search for your city to get started.";
+} else {
+  const loc = JSON.parse(cachedLocationData);
+  const name = `${loc.name}, ${loc.admin1}`;
+
+  cityInput.value = name;
+  ghostInput.value = name;
+
+  requestAnimationFrame(resizeSearchInput);
 }
-else {
-  const cachedName =
-    JSON.parse(cachedLocationData).name + ", " +
-    JSON.parse(cachedLocationData).admin1;
-
-  cityInput.value = cachedName;
-  ghostInput.value = cachedName;
-
-  requestAnimationFrame(() => {
-    resizeSearchInput();
-  });
-}
-
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(success, error);
-  } else { 
-    x.innerHTML = "Geolocation is not supported by this browser.";
-  }
-}
-
-async function success(position) {
-  const { latitude, longitude } = position.coords;
-
-  try {
-    const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&count=1&language=en`
-    );
-
-    const data = await res.json();
-    if (!data.results || !data.results.length) return;
-
-    const location = data.results[0];
-
-    localStorage.setItem("location_data", JSON.stringify(location));
-    location.reload();
-
-  } catch (err) {
-    console.error("Failed to reverse-geocode location", err);
-  }
-}
-
-function error() { alert("Sorry, no position available."); }
 
 /* -------------------------
-    CITY AUTOCOMPLETE
+   AUTOCOMPLETE
 -------------------------- */
 
-function measureTextWidth(text, referenceEl) {
+function measureTextWidth(text, ref) {
   const span = document.createElement("span");
-  span.style.position = "absolute";
   span.style.visibility = "hidden";
+  span.style.position = "absolute";
   span.style.whiteSpace = "pre";
-  span.style.font = getComputedStyle(referenceEl).font;
-  span.textContent = text || referenceEl.placeholder;
-
+  span.style.font = getComputedStyle(ref).font;
+  span.textContent = text;
   document.body.appendChild(span);
   const width = span.offsetWidth;
-  document.body.removeChild(span);
-
+  span.remove();
   return width;
 }
 
 function resizeSearchInput() {
   const text = ghostInput.value || cityInput.placeholder;
-  const width = measureTextWidth(text, cityInput);
-  cityInput.style.width = `${width + 6}px`;
+  cityInput.style.width = `${measureTextWidth(text, cityInput) + 6}px`;
 }
-
-requestAnimationFrame(() => {
-  resizeSearchInput();
-});
 
 let debounceTimer;
 let suggestion = "";
@@ -114,54 +151,47 @@ cityInput.addEventListener("input", () => {
     const data = await res.json();
     if (!data.results?.length) return;
 
-    const placeData = data.results[0];
-    const fullName = `${placeData.name}, ${placeData.admin1}`;
+    const place = data.results[0];
+    const full = `${place.name}, ${place.admin1}`;
 
-    const fullLower = fullName.toLowerCase();
-    const typedLower = typed.toLowerCase();
-
-    if (fullLower.startsWith(typedLower)) {
-      suggestion = fullName.slice(typed.length);
-      suggestionData = placeData;
-
+    if (full.toLowerCase().startsWith(typed.toLowerCase())) {
+      suggestion = full.slice(typed.length);
+      suggestionData = place;
       ghostInput.value = typed + suggestion;
       resizeSearchInput();
     }
-
   }, 250);
 });
 
-cityInput.addEventListener("keydown", (e) => {
+cityInput.addEventListener("keydown", e => {
   if (e.key === "Backspace" || e.key === "Delete") {
     suggestion = "";
     suggestionData = null;
   }
 
-  if (e.key == "Tab" || e.key == "ArrowRight" || e.key == "Enter") {
-    if (suggestionData) {
-      e.preventDefault();
-      cityInput.value += suggestion;
-      suggestion = cityInput.value;
+  if ((e.key === "Enter" || e.key === "Tab" || e.key === "ArrowRight") && suggestionData) {
+    e.preventDefault();
+    cityInput.value += suggestion;
 
-      localStorage.setItem("location_data", JSON.stringify(suggestionData));
-      location.reload();
-    }
+    clearCache();
+    localStorage.setItem("location_data", JSON.stringify(suggestionData));
+    location.reload();
   }
 });
 
 /* -------------------------
-   ODOMETER REGISTRY
+   ODOMETERS
 -------------------------- */
 
 const odometers = new Map();
 
-function getOdometer(el, startValue = 0) {
+function getOdometer(el, start = 0) {
   if (odometers.has(el)) return odometers.get(el);
 
   const odo = new Odometer({
     el,
-    value: startValue,
-    format: "(ddd)",   // change if you want decimals
+    value: start,
+    format: "(ddd)",
     theme: "default"
   });
 
@@ -169,142 +199,122 @@ function getOdometer(el, startValue = 0) {
   return odo;
 }
 
-function updateOdometer(el, newValue) {
-  const current = Number(el.textContent) || 0;
-  const odo = getOdometer(el, current);
-  odo.update(newValue);
+function updateOdometer(el, value) {
+  const odo = getOdometer(el, Number(el.textContent) || 0);
+  odo.update(value);
 }
 
 /* -------------------------
-   UI UPDATERS
+   UI UPDATERS (NO LOADING LOGIC)
 -------------------------- */
 
 function updateProbabilities(list) {
-  // Current day
-  const currentPercentEl = document.querySelector(".odometer");
-  const currentLabelEl = document.querySelector(".current-label");
+  const current = document.querySelector(".odometer");
+  const label = document.querySelector(".current-label");
 
-  updateOdometer(
-    currentPercentEl,
-    Number(list[0].snow_day_probability)
-  );
-  currentLabelEl.textContent = list[0].weekday;
+  updateOdometer(current, Number(list[0].snow_day_probability));
+  label.textContent = list[0].weekday;
 
-  // Other days
-  const metricValues = document.querySelectorAll(".metric-value .odometer");
-  const metricLabels = document.querySelectorAll(".metric-label");
+  const values = document.querySelectorAll(".metric-value .odometer");
+  const labels = document.querySelectorAll(".metric-label");
 
   for (let i = 1; i < list.length; i++) {
-    // i = 1 since list[0] was already used for the currect percentage
-    const index = i - 1; // i -1 because metricValues/Labels start at 0 
-
-    updateOdometer(
-      metricValues[index],
-      Number(list[i].snow_day_probability)
-    );
-
-    metricLabels[index].textContent = list[i].weekday;
+    updateOdometer(values[i - 1], Number(list[i].snow_day_probability));
+    labels[i - 1].textContent = list[i].weekday;
   }
 }
 
 function updateOthers(value) {
-  const othersEl = document.querySelector(".others-amount .odometer");
-  updateOdometer(othersEl, Number(value));
+  updateOdometer(
+    document.querySelector(".others-amount .odometer"),
+    Number(value)
+  );
 }
 
 function updateExplainer(list) {
-  const explainerElmts = document.querySelectorAll(".reason");
-  for (let i = 0; i < list.length; i++){
-    explainerElmts[i].textContent = list[i].reason;
-  }
-
+  const els = document.querySelectorAll(".reason");
+  list.forEach((r, i) => els[i].textContent = r.reason);
   popReasons();
 }
 
-function popReasons(containerSelector = ".reasons") {
-  const container = document.querySelector(containerSelector);
-  if (!container) return;
-
-  const items = [...container.querySelectorAll(".reason")];
-
-  // assign stagger index
-  items.forEach((el, idx) => el.style.setProperty("--i", idx));
-
-  // retrigger animation reliably
+function popReasons() {
+  const container = document.querySelector(".reasons");
   container.classList.remove("is-visible");
-  // force reflow so animations restart
   void container.offsetWidth;
-
   container.classList.add("is-visible");
 }
 
-/* -------------------------
-   APPLY CACHED UI
--------------------------- */
+/* ------------------------- 
+    APPLY CACHED UI 
+-------------------------- */ 
 
-if (cachedCounter !== null) {
-  updateOthers(Number(cachedCounter));
-}
+let hadAnyCache = false;
 
 if (cachedPredictions) {
   try {
-    updateProbabilities(JSON.parse(cachedPredictions));
-  } catch (e) {
-    console.error("Failed to parse cached snowday_predictions", e);
-  }
+    pendingData.predictions = JSON.parse(cachedPredictions);
+    loadingState.predictions = true;
+    hadAnyCache = true;
+  } catch {}
 }
 
 if (cachedExplanations) {
   try {
-    updateExplainer(JSON.parse(cachedExplanations));
-  } catch (e) {
-    console.error("Failed to parse cached prediction_explanations", e);
+    pendingData.explanations = JSON.parse(cachedExplanations);
+    loadingState.explanations = true;
+    hadAnyCache = true;
+  } catch {}
+}
+
+if (cachedCounter !== null) {
+  const num = Number(cachedCounter);
+  if (!Number.isNaN(num)) {
+    pendingData.counter = num;
+    loadingState.counter = true;
+    hadAnyCache = true;
   }
 }
 
+if (hadAnyCache) {
+  checkLoadingComplete(); // immediate render from cache
+}
+
 /* -------------------------
-   FETCH FRESH DATA
+   FETCH DATA
 -------------------------- */
 
 if (cachedLocationData) {
-
-  const lat = JSON.parse(cachedLocationData).latitude;
-  const lon = JSON.parse(cachedLocationData).longitude;
+  const loc = JSON.parse(cachedLocationData);
+  const lat = loc.latitude;
+  const lon = loc.longitude;
 
   fetch(predictApi + `?lat=${lat}&lon=${lon}`)
-    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(r => r.json())
     .then(data => {
       localStorage.setItem("snowday_predictions", JSON.stringify(data));
-      setTimeout(function(){
-        updateProbabilities(data);
-      }, 2000);
-    })
-    .catch(console.error);
+      pendingData.predictions = data;
+      loadingState.predictions = true;
+      checkLoadingComplete();
+    });
 
   fetch(explainerApi + `?lat=${lat}&lon=${lon}`)
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(reasons => {
-      if (JSON.stringify(reasons) != cachedExplanations)
-      {
-        localStorage.setItem("prediction_explanations", JSON.stringify(reasons));
-        setTimeout(function(){
-          updateExplainer(reasons);
-        }, 2000);
-      }
-    })
-    .catch(console.error);
+    .then(r => r.json())
+    .then(data => {
+      localStorage.setItem("prediction_explanations", JSON.stringify(data));
+      pendingData.explanations = data;
+      loadingState.explanations = true;
+      checkLoadingComplete();
+    });
 
   fetch(counterApi)
-    .then(r => r.ok ? r.text() : Promise.reject())
-    .then(counter => {
-      localStorage.setItem("counter_value", counter);
-      setTimeout(function(){
-        updateOthers(Number(counter))
-      }, 2000);
-
-    })
-    .catch(console.error);
-
+    .then(r => r.text())
+    .then(val => {
+      const num = Number(val);
+      localStorage.setItem("counter_value", String(num));
+      pendingData.counter = num;
+      loadingState.counter = true;
+      checkLoadingComplete();
+    });
 }
 
 /* -------------------------
