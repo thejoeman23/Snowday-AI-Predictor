@@ -85,6 +85,7 @@ const cachedCounter = (() => {
 
 const cachedLocationData = localStorage.getItem("location_data");
 
+const cityForm = document.querySelector(".city-form");
 const cityInput  = document.getElementById("cityInput");
 const ghostInput = document.getElementById("ghostInput");
 
@@ -173,13 +174,25 @@ cityInput.addEventListener("keydown", e => {
 
   if ((e.key === "Enter" || e.key === "Tab" || e.key === "ArrowRight") && suggestionData) {
     e.preventDefault();
-    cityInput.value += suggestion;
-
-    clearCache();
-    localStorage.setItem("location_data", JSON.stringify(suggestionData));
-    location.reload();
+    autocomplete();
   }
 });
+
+cityForm.addEventListener("submit", e => {
+  if (!suggestionData) return;
+
+  e.preventDefault();
+  confirmCity();
+});
+
+function autocomplete()
+{
+  cityInput.value += suggestion;
+
+  clearCache();
+  localStorage.setItem("location_data", JSON.stringify(suggestionData));
+  location.reload();
+}
 
 /* -------------------------
    ODOMETERS
