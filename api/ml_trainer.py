@@ -13,7 +13,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 
 BRAIN_CELLS = 100
 SEED = 42
-TEST_SIZE = 0.8
+TEST_SIZE = 0.2
 
 # ----------------------------------------
 
@@ -132,9 +132,9 @@ def Test(data):
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("data/training_dataset_1.csv")
+TRAINING_DATA = pd.read_csv("data/training_dataset_2.csv")
 TESTING_DATA = weather.get_this_weeks_data()
 
-Train(TRAINING_DATA)
-PrintFeatureImportance()
+#Train(TRAINING_DATA)
+#PrintFeatureImportance()
 Test(TESTING_DATA)

@@ -31,13 +31,38 @@ def GetExplanations(data, model):
             if not name.startswith("weather_code")
         ]
 
-        items_sorted = sorted(
-            items,
-            key=lambda x: abs(x[1]),
-            reverse=True
-        )
+        items = [
+            (name, shap_val, value)
+            for name, shap_val, value in zip(
+                exp.feature_names,
+                exp.values,
+                exp.data
+            )
+            if not name.startswith("weather_code")
+        ]
 
-        top = items_sorted[:3]
+        # Split by direction
+        snow_factors = [
+            x for x in items
+            if "snow" in str(x[0]) or "precip" in str(x[0])
+        ]
+
+        wind_factors = [
+            x for x in items
+            if "wind" in str(x[0])
+        ]
+
+        other_factors = [
+            x for x in items
+            if "snow" not in str(x[0]) and "wind" not in str(x[0]) and "precip" not in str(x[0])
+        ]
+
+        # Sort each group
+        snow_sorted = sorted(snow_factors, key=lambda x: x[1], reverse=True)
+        wind_sorted = sorted(wind_factors, key=lambda x: x[1], reverse=True)
+        other_sorted = sorted(other_factors, key=lambda x: x[1], reverse=True)
+
+        top = snow_sorted[:1] + wind_sorted[:1] + other_sorted[:1]
 
         explanations[i] = [
             {
@@ -58,6 +83,7 @@ def HumanizeFeatureValue(feature, value, shap_value):
     Uses predefined buckets for each feature.
     """
 
+    # Get hour for hourly variables like snowfall_3, etc.
     time = feature[len(feature)-1:]
     time = int(time) if time.isdigit() else None
 
@@ -67,7 +93,7 @@ def HumanizeFeatureValue(feature, value, shap_value):
         if value <= threshold:
             full_label = label if time is None else f"{label} ({time if time != 0 else 12} am)"
             icon = "⬆️" if shap_value > 0 else "⬇️"
-            return f"{full_label}"
+            return f"{full_label}{icon}"
 
 FEATURE_BUCKETS = {
 
@@ -87,11 +113,25 @@ FEATURE_BUCKETS = {
         (999, "Extreme Overnight Snowfall"),
     ],
     "snowfall_24h": [
-        (0, "No Snowfall (24h)"),
-        (5, "Light Snowfall (24h)"),
-        (15, "Moderate Snowfall (24h)"),
-        (30, "Heavy Snowfall (24h)"),
-        (999, "Extreme Snowfall (24h)"),
+        (0, "No Snowfall (Daily Total)"),
+        (5, "Light Snowfall (Daily Total)"),
+        (15, "Moderate Snowfall (Daily Total)"),
+        (30, "Heavy Snowfall (Daily Total)"),
+        (999, "Extreme Snowfall (Daily Total)"),
+    ],
+    "snowfall_last_24h": [
+        (0, "No Snowfall (past 24h)"),
+        (5, "Light Snowfall (past 24h)"),
+        (15, "Moderate Snowfall (past 24h)"),
+        (30, "Heavy Snowfall (past 24h)"),
+        (999, "Extreme Snowfall (past 24h)"),
+    ],
+    "snowfall_last_12h": [
+        (0, "No Snowfall (past 12h)"),
+        (5, "Light Snowfall (past 12h)"),
+        (15, "Moderate Snowfall (past 12h)"),
+        (30, "Heavy Snowfall (past 12h)"),
+        (999, "Extreme Snowfall (past 12h)"),
     ],
 
     # ❄️ Snow depth (cm)
@@ -168,13 +208,6 @@ FEATURE_BUCKETS = {
         (999, "Extreme Overnight Wind Gusts"),
     ],
 
-    # 💧 Humidity (%)
-    "humidity_avg_overnight": [
-        (70, "Normal Overnight Humidity"),
-        (85, "High Overnight Humidity"),
-        (999, "Very High Overnight Humidity"),
-    ],
-
     # ❄️ Dew point (°C)
     "dewpoint_avg_overnight": [
         (-15, "Extremely Dry Overnight Air"),
@@ -185,8 +218,8 @@ FEATURE_BUCKETS = {
 
     # 🧊 Freezing rain (boolean)
     "freezing_rain": [
-        (0, "No Freezing Rain"),
-        (1, "Freezing Rain Conditions"),
+        (False, "No Freezing Rain"),
+        (True, "Freezing Rain Conditions"),
     ],
 
     # 🌥 Weather codes
