@@ -93,7 +93,7 @@ def HumanizeFeatureValue(feature, value, shap_value):
         if value <= threshold:
             full_label = label if time is None else f"{label} ({time if time != 0 else 12} am)"
             icon = "⬆️" if shap_value > 0 else "⬇️"
-            return f"{full_label}{icon}"
+            return f"{full_label}"
 
 FEATURE_BUCKETS = {
 
