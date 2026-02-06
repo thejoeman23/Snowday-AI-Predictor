@@ -27,7 +27,14 @@ def safe_mean(values):
     values = [v for v in values if v is not None]
     return sum(values) / len(values) if values else 0
 
+def safe_sum(values):
+    values = [v for v in values if v is not None]
+    return sum(values) if values else 0
+
+from datetime import datetime, timedelta
+
 def fetch_weather(start_date: str, end_date: str, lat: float, lon: float, use_forecast: bool = False) -> dict:
+
     if use_forecast:
         url = "https://api.open-meteo.com/v1/forecast"
     else:
@@ -40,9 +47,8 @@ def fetch_weather(start_date: str, end_date: str, lat: float, lon: float, use_fo
         "start_date": start_date,
         "end_date": end_date,
 
-        "daily": ["temperature_2m_mean", "snowfall_sum", "precipitation_sum", "temperature_2m_min",
-                  "wind_gusts_10m_max"],
-        "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "precipitation", "snowfall", "snow_depth",
+        "daily": ["temperature_2m_min", "wind_gusts_10m_max"],
+        "hourly": ["temperature_2m", "dew_point_2m", "precipitation", "snowfall", "snow_depth",
                    "weather_code", "wind_speed_10m", "wind_gusts_10m"],
 
         "timezone": "America/New_York",
@@ -81,31 +87,55 @@ def get_daily_for_date(daily, target_date):
     # creating a dictionary
     return {key: daily[key][day_index] for key in daily.keys()}
 
-def get_data_within_timerange(start_date: str, end_date: str, lat: float, lon: float, use_forecast: bool = False,) -> pd.DataFrame:
+def get_data_within_timerange(
+    start_date: str,
+    end_date: str,
+    lat: float,
+    lon: float,
+    use_forecast: bool = False,
+) -> pd.DataFrame:
+
     print("REQUESTING:", start_date, "→", end_date)
     rows = []
 
-    current = datetime.fromisoformat(start_date)
-    end = datetime.fromisoformat(end_date)
+    # Convert to datetime
+    start_dt = datetime.fromisoformat(start_date)
+    end_dt = datetime.fromisoformat(end_date)
 
-    data = fetch_weather(start_date, end_date, use_forecast=use_forecast, lat=lat, lon=lon)
+    if not use_forecast:
+        # Clamp end_date to yesterday
+        yesterday = datetime.today() - timedelta(days=1)
+        if end_dt > yesterday:
+            end_dt = yesterday
+
+    # Fetch weather only for the valid range
+    data = fetch_weather(
+        start_dt.strftime("%Y-%m-%d"),
+        end_dt.strftime("%Y-%m-%d"),
+        lat=lat,
+        lon=lon,
+        use_forecast=use_forecast,
+    )
 
     hourly = data["hourly"]
     daily = data["daily"]
 
-    # pandas datetimes for matching
+    current = start_dt
+    end = end_dt
+
+    yesterday_snow = []
 
     while current <= end:
-
-        # skip weekends
-        if not is_weekday(current):
-            current += timedelta(days=1)
-            continue
-
         date_str = current.strftime("%Y-%m-%d")
 
         today_hourly = get_hourly_for_date(hourly, date_str)
         today_daily = get_daily_for_date(daily, date_str)
+
+        # skip weekends
+        if not is_weekday(current):
+            current += timedelta(days=1)
+            yesterday_snow = today_hourly["snowfall"]
+            continue
 
         today_temp = today_hourly["temperature_2m"]
         today_precipitation = today_hourly["precipitation"]
@@ -113,32 +143,26 @@ def get_data_within_timerange(start_date: str, end_date: str, lat: float, lon: f
         today_snow_depth = today_hourly["snow_depth"]
         today_wind = today_hourly["wind_speed_10m"]
         today_wind_gusts = today_hourly["wind_gusts_10m"]
-        today_humidity = today_hourly["relative_humidity_2m"]
         today_dew  = today_hourly["dew_point_2m"]
         today_weather_code = today_hourly["weather_code"]
 
         # overnight = first 8 hours
         overnight_wind = today_wind[:8]
         overnight_dew  = today_dew[:8]
-        overnight_humidity = today_humidity[:8]
-        overnight_wind_gusts = today_wind_gusts[:8]
+        overnight_wind_gusts = today_daily["wind_gusts_10m_max"]
 
-        overnight_weather_code = today_weather_code[:8]
+        snowfall_overnight = safe_sum(today_snow[:8])
+        snowfall_24h = safe_sum(today_snow)
 
-        def safe_mean(values):
-            values = [v for v in values if v is not None]
-            return sum(values) / len(values) if values else 0
-
-        snowfall_overnight = sum(today_snow[:8])
-        snowfall_24h = today_daily["snowfall_sum"]
-
-        precipitation_overnight = sum(today_precipitation[:8])
-        precipitation_24h = today_daily["precipitation_sum"]
+        precipitation_overnight = safe_sum(today_precipitation[:8])
+        precipitation_24h = safe_sum(today_precipitation)
 
         row = {
             "date": date_str,
             "snow_day": int((SNOW_DAYS["date"].astype(str) == date_str).any()),
 
+            "snowfall_last_24h": (safe_sum(yesterday_snow[7:]) + snowfall_overnight) if yesterday_snow else 0,
+            "snowfall_last_12h": (safe_sum(yesterday_snow[20:]) + snowfall_overnight) if yesterday_snow else 0,
             "snowfall_overnight": snowfall_overnight,
             "snowfall_24h": snowfall_24h,
 
@@ -158,9 +182,8 @@ def get_data_within_timerange(start_date: str, end_date: str, lat: float, lon: f
 
             "temp_min_overnight": today_daily["temperature_2m_min"],
             "wind_speed_avg_overnight": safe_mean(overnight_wind),
-            "wind_gusts_max_overnight": max(overnight_wind_gusts),
+            "wind_gusts_max_overnight": overnight_wind_gusts,
             "dewpoint_avg_overnight": safe_mean(overnight_dew),
-            "humidity_avg_overnight": safe_mean(overnight_humidity),
         }
 
         # first 8 hours
@@ -172,29 +195,19 @@ def get_data_within_timerange(start_date: str, end_date: str, lat: float, lon: f
             row[f"wind_speed{h}"] = today_wind[h] if h < len(today_wind) else 0
             row[f"wind_gusts{h}"] = today_wind_gusts[h] if h < len(today_wind_gusts) else 0
             row[f"weather_code{h}"] = today_weather_code[h] if h < len(today_weather_code) else 0
+            row[f"blowing_snow_risk{h}"] = row[f"snow_depth{h}"] * row[f"wind_gusts{h}"]
 
         rows.append(row)
         current += timedelta(days=1)
 
+        yesterday_snow = today_snow
+
     return pd.DataFrame(rows)
 
-def t() -> pd.DataFrame:
-    today = datetime.today()
-    monday = today - timedelta(days=today.weekday())
-    friday = monday + timedelta(days=4)
+def get_this_weeks_data(lat: float = 0, lon: float = 0) -> pd.DataFrame:
+    if lat == 0 and lon == 0:
+        lat, lon = LATITUDE, LONGITUDE
 
-    print(monday.day)
-    return get_data_within_timerange(
-        monday.strftime("%Y-%m-%d"),
-        friday.strftime("%Y-%m-%d"),
-        lat=LATITUDE,
-        lon=LONGITUDE,
-        use_forecast=True
-    )
-
-def get_this_weeks_data(lat: float, lon: float) -> pd.DataFrame:
-    print(lat, lon)
-    
     tz = ZoneInfo("America/Toronto")
     now = datetime.now(tz)
     today = now.date()
