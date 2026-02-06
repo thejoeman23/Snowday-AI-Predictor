@@ -223,18 +223,22 @@ function updateOdometer(el, value) {
    UI UPDATERS (NO LOADING LOGIC)
 -------------------------- */
 
+function roundTo5(percent) {
+  return Math.round(percent / 5) * 5;
+}
+
 function updateProbabilities(list) {
   const current = document.querySelector(".odometer");
   const label = document.querySelector(".current-label");
 
-  updateOdometer(current, Number(list[0].snow_day_probability));
+  updateOdometer(current, roundTo5(Number(list[0].snow_day_probability)));
   label.textContent = list[0].weekday;
 
   const values = document.querySelectorAll(".metric-value .odometer");
   const labels = document.querySelectorAll(".metric-label");
 
   for (let i = 1; i < list.length; i++) {
-    updateOdometer(values[i - 1], Number(list[i].snow_day_probability));
+    updateOdometer(values[i - 1], roundTo5(Number(list[i].snow_day_probability)));
     labels[i - 1].textContent = list[i].weekday;
   }
 }
