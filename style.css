@@ -1,7 +1,7 @@
 :root {
   /* COLORS */
   --bg: linear-gradient(180deg, #2c2929, #000000);
-  --search-bg: #3f3f3f2e;
+  --search-bg: #222222dd;
   --card-bg: #222222dd;
   --text-white: #ffffff;
   --text-muted: #636363;

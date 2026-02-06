@@ -7,7 +7,7 @@ from pathlib import Path
 # ---------------- CONFIG ----------------
 
 LATITUDE = 44.56
-LONGITUDE = -81.98
+LONGITUDE = -80.98
 
 BASE_DIR = Path(__file__).resolve().parent
 CSV_PATH = BASE_DIR / "data" / "snow_day_dates.csv"
