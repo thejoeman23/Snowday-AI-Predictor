@@ -58,9 +58,9 @@ def GetExplanations(data, model):
         ]
 
         # Sort each group
-        snow_sorted = sorted(snow_factors, key=lambda x: x[1], reverse=True)
-        wind_sorted = sorted(wind_factors, key=lambda x: x[1], reverse=True)
-        other_sorted = sorted(other_factors, key=lambda x: x[1], reverse=True)
+        snow_sorted = sorted(snow_factors, key=lambda x: abs(x[1]), reverse=True)
+        wind_sorted = sorted(wind_factors, key=lambda x: abs(x[1]), reverse=True)
+        other_sorted = sorted(other_factors, key=lambda x: abs(x[1]), reverse=True)
 
         top = snow_sorted[:1] + wind_sorted[:1] + other_sorted[:1]
 
@@ -134,12 +134,10 @@ FEATURE_BUCKETS = {
         (999, "Extreme Snowfall (past 12h)"),
     ],
 
-    # ❄️ Snow depth (cm)
-    "snow_depth": [
-        (0, "No Snow Accumulation"),
-        (10, "Notable Snow Accumulation"),
-        (25, "Deep Snow Accumulation"),
-        (999, "Extreme Snow Accumulation"),
+    # ❄️ Blowing Snow Risk (cm)
+    "blowing_snow_risk": [
+        (0, "No Blowing Snow"),
+        (2, "Light Blowing Snow"),
     ],
 
     # 🌧 Precipitation (mm)

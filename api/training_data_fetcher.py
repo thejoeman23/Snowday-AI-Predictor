@@ -5,11 +5,11 @@ print("Insert year(s) (e.g. 2021, 2022, etc): ")
 years = input().split(", ")
 years = [y.strip() for y in years if y.strip()]
 
-print("\nInsert latitude and longitude (e.g. 44.56, -81.98): ")
+print("\nInsert latitude and longitude (e.g. 44.56, -80.98): ")
 latlon = input().strip()
 
 if latlon == "":
-    latitude, longitude = 44.56, -81.98
+    latitude, longitude = 44.569, -80.98
 else:
     latitude, longitude = latlon.split(", ")
     latitude, longitude = float(latitude), float(longitude)
@@ -42,7 +42,7 @@ if choice in ["y", ""]:
     print("\nData Pulled. What is the # of this training dataset?")
     number = int(input().strip())
 
-    filename = f"training_dataset_{number}.csv"
+    filename = f"data/training_dataset_{number}.csv"
     final_df.to_csv(filename, index=False)
 
     print(f"\nDone. Saved {len(final_df)} rows to {filename}")

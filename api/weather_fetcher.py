@@ -6,7 +6,7 @@ from pathlib import Path
 
 # ---------------- CONFIG ----------------
 
-LATITUDE = 44.56
+LATITUDE = 44.569
 LONGITUDE = -80.98
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -33,7 +33,7 @@ def safe_sum(values):
 
 from datetime import datetime, timedelta
 
-def fetch_weather(start_date: str, end_date: str, lat: float, lon: float, use_forecast: bool = False) -> dict:
+def fetch_weather(start_date: str, end_date: str, lat: float = LATITUDE, lon: float = LONGITUDE, use_forecast: bool = False) -> dict:
 
     if use_forecast:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -48,7 +48,7 @@ def fetch_weather(start_date: str, end_date: str, lat: float, lon: float, use_fo
         "end_date": end_date,
 
         "daily": ["temperature_2m_min", "wind_gusts_10m_max"],
-        "hourly": ["temperature_2m", "dew_point_2m", "precipitation", "snowfall", "snow_depth",
+        "hourly": ["temperature_2m", "dew_point_2m", "precipitation", "snowfall",
                    "weather_code", "wind_speed_10m", "wind_gusts_10m"],
 
         "timezone": "America/New_York",
@@ -140,7 +140,6 @@ def get_data_within_timerange(
         today_temp = today_hourly["temperature_2m"]
         today_precipitation = today_hourly["precipitation"]
         today_snow = today_hourly["snowfall"]
-        today_snow_depth = today_hourly["snow_depth"]
         today_wind = today_hourly["wind_speed_10m"]
         today_wind_gusts = today_hourly["wind_gusts_10m"]
         today_dew  = today_hourly["dew_point_2m"]
@@ -191,11 +190,10 @@ def get_data_within_timerange(
             row[f"temperature{h}"] = today_temp[h] if h < len(today_temp) else 0
             row[f"precipitation{h}"] = today_precipitation[h] if h < len(today_precipitation) else 0
             row[f"snowfall{h}"] = today_snow[h] if h < len(today_snow) else 0
-            row[f"snow_depth{h}"] = today_snow_depth[h] if h < len(today_snow_depth) else 0
             row[f"wind_speed{h}"] = today_wind[h] if h < len(today_wind) else 0
             row[f"wind_gusts{h}"] = today_wind_gusts[h] if h < len(today_wind_gusts) else 0
-            row[f"weather_code{h}"] = today_weather_code[h] if h < len(today_weather_code) else 0
-            row[f"blowing_snow_risk{h}"] = row[f"snow_depth{h}"] * row[f"wind_gusts{h}"]
+            row[f"weather_code{h}"] = any(code in {71,73,75,77,85,86} for code in today_weather_code)
+            #row[f"blowing_snow_risk{h}"] = row[f"snowfall{h}"] * row[f"wind_gusts{h}"]
 
         rows.append(row)
         current += timedelta(days=1)
@@ -203,6 +201,38 @@ def get_data_within_timerange(
         yesterday_snow = today_snow
 
     return pd.DataFrame(rows)
+
+def get_weather_code_label(code) -> str:
+    codes = {
+        66: "Freezing Rain (Light)",
+        67: "Freezing Rain (Heavy)",
+
+        71: "Snowfall (Light)",
+        73: "Snowfall (Moderate)",
+        75: "Snowfall (Heavy)",
+
+        77: "Snow Grains",
+
+        85: "Snow Showers (Light)",
+        86: "Snow Showers (Heavy)",
+    }
+
+    return codes.get(code, "Other")
+
+
+def t() -> pd.DataFrame:
+    today = datetime.today()
+    monday = today - timedelta(days=today.weekday())
+    friday = monday + timedelta(days=4)
+
+    print(monday.day)
+    return get_data_within_timerange(
+        monday.strftime("%Y-%m-%d"),
+        friday.strftime("%Y-%m-%d"),
+        lat=LATITUDE,
+        lon=LONGITUDE,
+        use_forecast=True
+    )
 
 def get_this_weeks_data(lat: float = 0, lon: float = 0) -> pd.DataFrame:
     if lat == 0 and lon == 0:

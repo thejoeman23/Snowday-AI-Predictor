@@ -7,13 +7,15 @@ from explainer import GetExplanations
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, recall_score, precision_score
 
 # ---------------- CONFIG ----------------
 
 BRAIN_CELLS = 100
 SEED = 42
-TEST_SIZE = 0.2
+TEST_SIZE = 0.3
+THRESHOLD = 0.35  # <---- KEY CHANGE (was implicitly 0.5 before)
+
 
 # ----------------------------------------
 
@@ -26,7 +28,8 @@ def Train(data):
     x_train, x_test, y_train, y_test = train_test_split(
         x, y,
         test_size=TEST_SIZE,
-        random_state=SEED
+        random_state=SEED,
+        stratify=y,
     )
 
     # 🔍 GRID SEARCH
@@ -34,18 +37,19 @@ def Train(data):
         "n_estimators": [100, 300, 500],
         "max_depth": [None, 6, 10, 15],
         "min_samples_split": [2, 5, 10],
-        "class_weight": [None, "balanced"],
+        # removed class_weight from grid → we force balanced
     }
 
     base_model = RandomForestClassifier(
-        random_state=SEED
+        random_state=SEED,
+        class_weight="balanced"
     )
 
     grid = GridSearchCV(
         base_model,
         param_grid,
         cv=5,
-        scoring="recall",   # snow days matter more
+        scoring="recall",  # snow days matter most
         n_jobs=-1
     )
 
@@ -53,17 +57,21 @@ def Train(data):
 
     MODEL = grid.best_estimator_
 
-    with open("model.pkl", "wb") as f:  # <- save to a folder your server can access
+    with open("model.pkl", "wb") as f:
         pickle.dump(MODEL, f)
+
     print("BEST MODEL SETTINGS:")
     print(grid.best_params_)
     print()
 
     # ---------------- EVALUATION ----------------
 
-    y_pred = MODEL.predict(x_test)
+    probs = MODEL.predict_proba(x_test)[:, 1]
+    y_pred = (probs >= THRESHOLD).astype(int)
 
     print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("Snow Day Recall:", recall_score(y_test, y_pred))
+    print("Snow Day Precision:", precision_score(y_test, y_pred))
     print()
 
     cm = confusion_matrix(y_test, y_pred)
@@ -72,6 +80,7 @@ def Train(data):
     print(f"Predicted {tn}/{tn + fp} non-snow days")
     print(f"Predicted {tp}/{tp + fn} snow days")
     print()
+
 
 def PrintFeatureImportance():
     importances = MODEL.feature_importances_
@@ -84,20 +93,17 @@ def PrintFeatureImportance():
 
     print("\nTOP FACTORS THE MODEL USES:")
     for _, row in importance_df.head(8).iterrows():
-        print(f"- {row['feature']}")        
+        print(f"- {row['feature']}")
+
 
 def Test(data):
+    X = data.drop(columns=["date", "snow_day"])
 
-    # features used by the model
-    X = data.drop(columns=["date", "snow_day"], errors="ignore")
-
-    # load model
     with open("../api/model.pkl", "rb") as f:
         MODEL = pickle.load(f)
 
     all_explanations = GetExplanations(X, MODEL)
 
-    # predicted probability of snow day
     probs = MODEL.predict_proba(X)[:, 1]
 
     results = data.copy()
@@ -105,36 +111,47 @@ def Test(data):
 
     print("SNOW DAY ODDS\n")
 
-    # iterate each day
     for i, row in results.iterrows():
-
         weekday = pd.to_datetime(row["date"]).day_name()
 
-        odds = (
-            row["snow_day_probability"] * 100 if row.get("snowfall_24h", 0) != 0 else 0.01
-        )
+        odds = row["snow_day_probability"] * 100
 
         print(
-            f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day "
-            f"(so {'yes' if odds > 50 else 'no'})"
-        )
+            f"{row['date']} ({weekday}) → {odds:.1f}% chance of snow day")
 
         explanations = all_explanations[i]
-        
+
         explanation_list = [
-                { "explanation": explanation["humanized_value"] }
-                for explanation in explanations
-            ]
+            {"explanation": explanation["humanized_value"] + ("+" if explanation["direction"] == "up" else "-")}
+            for explanation in explanations
+        ]
+
         print("  Top factors:")
         print(" ", explanation_list)
-
         print()
+
+def add_predictions(data):
+    X = data.drop(columns=["date", "snow_day"])
+
+    with open("../api/model.pkl", "rb") as f:
+        MODEL = pickle.load(f)
+
+    probs = MODEL.predict_proba(X)[:, 1]
+
+    data["prob"] = (probs * 100).round().astype(int)
+
+    data.to_csv("data/training_dataset_7.csv", index=False)
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("data/training_dataset_2.csv")
+TRAINING_DATA = pd.read_csv("data/training_dataset_6.csv")
+
+
 TESTING_DATA = weather.get_this_weeks_data()
+
+#add_predictions(TRAINING_DATA)
 
 #Train(TRAINING_DATA)
 #PrintFeatureImportance()
+
 Test(TESTING_DATA)

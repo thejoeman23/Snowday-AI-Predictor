@@ -126,6 +126,7 @@ async def update_counter():
 # Helpers
 # ───────────────────────────────────────────────────────────────
 
+
 def describe_day(target_date):
     now = datetime.now(ZoneInfo("America/Toronto"))
 
