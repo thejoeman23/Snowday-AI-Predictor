@@ -7,6 +7,7 @@ const locationApi = "https://geocoding-api.open-meteo.com/v1/search?";
    LOADING STATE
 -------------------------- */
 
+
 const loadingState = {
   predictions: false,
   explanations: false,
@@ -38,6 +39,7 @@ function hydrateUI() {
   updateProbabilities(pendingData.predictions);
   updateExplainer(pendingData.explanations);
   updateOthers(pendingData.counter);
+  updateURL();
 }
 
 function checkLoadingComplete() {
@@ -88,6 +90,8 @@ const cachedLocationData = localStorage.getItem("location_data");
 const cityForm = document.querySelector(".city-form");
 const cityInput  = document.getElementById("cityInput");
 const ghostInput = document.getElementById("ghostInput");
+
+
 
 /* -------------------------
    LOCATION HANDLING
@@ -225,6 +229,15 @@ function updateOdometer(el, value) {
 
 function roundTo5(percent) {
   return Math.round(percent / 5) * 5;
+}
+
+function updateURL() {
+  const slug = cityInput.value
+  .toLowerCase()
+  .replace(/\s+/g, "-")
+  .replace(/[^a-z-]/g, "");
+
+  window.history.pushState({}, "", `?city=${slug}`);
 }
 
 function updateProbabilities(list) {
@@ -371,3 +384,152 @@ button.addEventListener("click", async () => {
 
   button.disabled = false;
 });
+
+const ctx = document.getElementById('test');
+
+// 0–23 hours
+const hours = [
+  "0","1","2","3","4","5","6","7",
+  "8","9","10","11","12","13","14","15",
+  "16","17","18","19","20","21","22","23"
+];
+
+// TEST DATA (realistic winter storm pattern)
+
+// mm per hour
+const precipitationData = [
+  0,0,0,0.2,0.5,1.2,2.0,2.8,
+  3.5,4.2,3.8,3.0,2.4,1.8,1.2,0.8,
+  0.5,0.3,0.2,0.1,0,0,0,0
+];
+
+// cm per hour
+const snowData = [
+  0,0,0,0.1,0.3,0.8,1.5,2.2,
+  2.8,3.1,2.6,2.0,1.6,1.2,0.8,0.5,
+  0.3,0.2,0.1,0,0,0,0,0
+];
+
+// km/h gusts
+const gustData = [
+  10,12,15,18,22,28,35,40,
+  45,50,55,52,48,42,38,34,
+  30,26,22,18,15,12,10,8
+];
+
+// km visibility (drops during storm)
+const visibilityData = [
+  16,16,15,12,10,7,5,3,
+  2,1.5,1.2,1.5,2,3,4,6,
+  8,10,12,14,16,16,16,16
+];
+
+// °C
+const tempData = [
+  -6,-7,-8,-8,-9,-9,-10,-10,
+  -9,-8,-7,-6,-5,-4,-3,-3,
+  -4,-5,-6,-6,-7,-7,-7,-6
+];
+
+const mixedChart = new Chart(ctx, {
+  data: {
+    labels: hours,
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Precipitation (mm)',
+        data: precipitationData,
+        yAxisID: 'yPrecip'
+      },
+      {
+        type: 'bar',
+        label: 'Snowfall (cm)',
+        data: snowData,
+        yAxisID: 'yPrecip'
+      },
+      {
+        type: 'line',
+        label: 'Wind Gusts (km/h)',
+        data: gustData,
+        yAxisID: 'yWind',
+        tension: 0.35,
+        pointRadius: 0
+      },
+      {
+        type: 'line',
+        label: 'Visibility (km)',
+        data: visibilityData,
+        yAxisID: 'yVis',
+        tension: 0.35,
+        pointRadius: 0
+      },
+      {
+        type: 'line',
+        label: 'Temperature (°C)',
+        data: tempData,
+        yAxisID: 'yTemp',
+        tension: 0.35,
+        pointRadius: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Hour of Day'
+        }
+      },
+
+      yPrecip: {
+        type: 'linear',
+        position: 'left',
+        title: {
+          display: true,
+          text: 'Precipitation / Snow'
+        }
+      },
+
+      yTemp: {
+        type: 'linear',
+        position: 'left',
+        offset: true,
+        title: {
+          display: true,
+          text: 'Temperature (°C)'
+        }
+      },
+
+      yWind: {
+        type: 'linear',
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Wind Gusts (km/h)'
+        },
+        grid: {
+          drawOnChartArea: false
+        }
+      },
+
+      yVis: {
+        type: 'linear',
+        position: 'right',
+        offset: true,
+        title: {
+          display: true,
+          text: 'Visibility (km)'
+        },
+        grid: {
+          drawOnChartArea: false
+        }
+      }
+    }
+  }
+}); 
