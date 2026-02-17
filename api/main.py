@@ -13,6 +13,8 @@ from explainer import GetExplanations
 
 from zoneinfo import ZoneInfo
 
+from alert_fetcher import *
+
 # ───────────────────────────────────────────────────────────────
 # App + Paths
 # ───────────────────────────────────────────────────────────────
@@ -51,6 +53,19 @@ with open(MODEL_PATH, "rb") as f:
 # Routes
 # ───────────────────────────────────────────────────────────────
 
+ALERT_PERCENTAGE_BUCKET = {
+    "Special Weather Statement": 70,
+    "Fog Advisory": 85,
+    "Extreme Cold Warning": 75,
+    "Freezing Drizzle Advisory": 99,
+    "Freezing Rain Warning": 99,
+    "Arctic Outflow Warning": 75,
+    "Snowfall Warning": 80,
+    "Blowing Snow Advisory": 80,
+    "Winter Storm Watch": 99,
+    "Snow Squall Warning": 80,
+}
+
 @app.get("/predict")
 async def predictions(lat: float, lon: float):
     # Get prediction data
@@ -65,14 +80,34 @@ async def predictions(lat: float, lon: float):
     results = []
     for i, row in data.iterrows():
         weekday = describe_day(row["date"])
-        odds = int(round(row["snow_day_probability"] * 100))
+        odds = float(round(row["snow_day_probability"] * 100))
+        main_alert = get_alert(lat, lon)
+        alert_odds = ALERT_PERCENTAGE_BUCKET[main_alert]
 
         results.append({
             "weekday": weekday,
-            "snow_day_probability": float(odds),
+            "snow_day_probability": max(odds, alert_odds),
+            "main_alert": main_alert,
         })
+        print(results[0])
 
     return results
+
+def get_alert(lat, lon):
+    alerts = get_alerts_for_coords(lat, lon)
+
+    max_alert_name = ""
+    max_alert_value = 0
+    for alert in alerts:
+        alert_name = alert["type"]
+        alert_value = ALERT_PERCENTAGE_BUCKET[alert_name]
+
+        if alert_value > max_alert_value:
+            max_alert_name = alert_name
+            max_alert_value = alert_value
+
+    return max_alert_name
+
 
 @app.get("/explain")
 async def explain(lat: float, lon: float):
