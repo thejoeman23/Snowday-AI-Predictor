@@ -6,10 +6,8 @@
   --text-white: #ffffff;
   --text-muted: #636363;
   --accent: #59A6F7;
-  --accent-red: #D80621;
   --accent-pink: #e673c6;
   --outline: rgba(255, 255, 255, 0.3);
-  --reason-outline: 1px solid rgba(255, 255, 255, 0.1);
 
   --loading-stripe-light: rgb(23, 23, 23);
   --loading-stripe-dark: rgb(22, 22, 22);
@@ -35,25 +33,12 @@
 
   --fs-others-label-min: 12px;
   --fs-others-label-max: 20px;
-
-  --fs-alert-label-min: 12px;
-  --fs-alert-label-max: 25px;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-button {
-	background: none;
-	color: inherit;
-	border: none;
-	padding: 0;
-	font: inherit;
-	cursor: pointer;
-	outline: inherit;
 }
 
 /* GLOBAL RESET + SAFE AREA FIX */
@@ -348,8 +333,8 @@ body.sandstorm-active {
   font-size: clamp(var(--fs-metric-label-min), 3.5vw, var(--fs-metric-label-max));
   font-weight: 600;
   color: var(--text-muted);
-  background: #2d2d2d;
-  border: var(--reason-outline);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   letter-spacing: -0.02em;
   padding: 6px 10px;
@@ -370,85 +355,6 @@ body.sandstorm-active {
 .reasons.is-visible .reason {
   animation: reason-pop 1s cubic-bezier(0.2, 0.9, 0.2, 1) both;
   animation-delay: calc(var(--i, 0) * 90ms);
-}
-
-.reason.warning {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  padding: clamp(14px, 3vw, 20px);
-  border-radius: 14px;
-
-  font-size: clamp(var(--fs-alert-label-min), 3.5vw, var(--fs-alert-label-max));
-  font-weight: 600;
-  color: var(--text-white);
-  text-align: center;
-  letter-spacing: 0.02em;
-
-  /* override pop animation cleanly */
-  opacity: 1;
-  transform: none;
-  filter: none;
-  margin: 0;
-}
-
-/* Environment Canada strip */
-.reason.warning::before {
-  content: "Environment Canada";
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-
-  color: var(--text-white);
-
-  opacity: 0.75;
-  margin-bottom: 6px;
-}
-
-/* Push main text below strip */
-.reason.warning > * {
-  margin-top: clamp(18px, 4vw, 24px);
-}
-
-.dropdown-line {
-  width: 100%;
-  height: 1px;
-  background: var(--outline);
-  margin-top: clamp(12px, 3vw, 18px);
-  margin-bottom: clamp(12px, 3vw, 18px);
-
-  align-items: center;
-  justify-content: center;
-  display: flex;
-}
-
-.dropdown-button {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #2d2d2d;
-
-  rotate: 0deg;
-
-  font-weight: 200;
-  color: var(--text-white);
-
-  outline: 1px solid var(--outline);
-  z-index: 5;
-}
-
-.dropdown-button .pressed {
-  animation: rotateArrow 0.3s ease forwards;
-}
-
-@keyframes rotateArrow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(180deg); }
 }
 
 @keyframes reason-pop {

@@ -124,7 +124,6 @@ def _get_all_alerts():
     base = f"https://dd.weather.gc.ca/{date}/WXO-DD/alerts/cap/{date}/"
 
     office_dirs = _get_office_dirs(base)
-    office_dirs = [(base + "CWTO/")]
     all_alerts = []
 
     for office_dir in office_dirs:
