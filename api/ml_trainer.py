@@ -144,7 +144,7 @@ def add_predictions(data):
 
 # ---------------- RUN ----------------
 
-TRAINING_DATA = pd.read_csv("data/training_dataset_6.csv")
+#TRAINING_DATA = pd.read_csv("data/training_dataset_6.csv")
 
 
 TESTING_DATA = weather.get_this_weeks_data()

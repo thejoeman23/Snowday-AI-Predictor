@@ -12,67 +12,72 @@ def GetExplanations(data, model):
     for i in data.index:
         row = data.loc[[i]]  # keep 2D
 
-        shap_values = explainer(row)
-
-        exp = shap.Explanation(
-            values=shap_values.values[0, :, 1],
-            base_values=shap_values.base_values[0, 1],
-            data=row.iloc[0],
-            feature_names=row.columns
-        )
-
-        items = [
-            (name, shap_val, value)
-            for name, shap_val, value in zip(
-                exp.feature_names,
-                exp.values,
-                exp.data
-            )
-            if not name.startswith("weather_code")
-        ]
-
-        items = [
-            (name, shap_val, value)
-            for name, shap_val, value in zip(
-                exp.feature_names,
-                exp.values,
-                exp.data
-            )
-            if not name.startswith("weather_code")
-        ]
-
-        # Split by direction
-        snow_factors = [
-            x for x in items
-            if "snow" in str(x[0]) or "precip" in str(x[0])
-        ]
-
-        wind_factors = [
-            x for x in items
-            if "wind" in str(x[0])
-        ]
-
-        other_factors = [
-            x for x in items
-            if "snow" not in str(x[0]) and "wind" not in str(x[0]) and "precip" not in str(x[0])
-        ]
-
-        # Sort each group
-        snow_sorted = sorted(snow_factors, key=lambda x: abs(x[1]), reverse=True)
-        wind_sorted = sorted(wind_factors, key=lambda x: abs(x[1]), reverse=True)
-        other_sorted = sorted(other_factors, key=lambda x: abs(x[1]), reverse=True)
-
-        top = snow_sorted[:1] + wind_sorted[:1] + other_sorted[:1]
+        # shap_values = explainer(row)
+        #
+        # exp = shap.Explanation(
+        #     values=shap_values.values[0, :, 1],
+        #     base_values=shap_values.base_values[0, 1],
+        #     data=row.iloc[0],
+        #     feature_names=row.columns
+        # )
+        #
+        # items = [
+        #     (name, shap_val, value)
+        #     for name, shap_val, value in zip(
+        #         exp.feature_names,
+        #         exp.values,
+        #         exp.data
+        #     )
+        #     if not (name.startswith("weather_code") or name.__contains__("last"))
+        # ]
+        #
+        # # Split by direction
+        # snow_factors = [
+        #     x for x in items
+        #     if "snow" in str(x[0]) or "precip" in str(x[0])
+        # ]
+        #
+        # wind_factors = [
+        #     x for x in items
+        #     if "wind" in str(x[0])
+        # ]
+        #
+        # other_factors = [
+        #     x for x in items
+        #     if "snow" not in str(x[0]) and "wind" not in str(x[0]) and "precip" not in str(x[0])
+        # ]
+        #
+        # # Sort each group
+        # snow_sorted = sorted(snow_factors, key=lambda x: abs(x[1]), reverse=True)
+        # wind_sorted = sorted(wind_factors, key=lambda x: abs(x[1]), reverse=True)
+        # other_sorted = sorted(other_factors, key=lambda x: abs(x[1]), reverse=True)
+        #
+        # top = snow_sorted[:1] + wind_sorted[:1] + other_sorted[:1]
+        #
+        # explanations[i] = [
+        #     {
+        #         "feature": name,
+        #         "impact": round(float(shap_val), 3),
+        #         "value": round(float(value), 2),
+        #         "direction": "up" if shap_val > 0 else "down",
+        #         "humanized_value": HumanizeFeatureValue(name, value, shap_val),
+        #     }
+        #     for name, shap_val, value in top
+        # ]
 
         explanations[i] = [
             {
-                "feature": name,
-                "impact": round(float(shap_val), 3),
-                "value": round(float(value), 2),
-                "direction": "up" if shap_val > 0 else "down",
-                "humanized_value": HumanizeFeatureValue(name, value, shap_val),
+                "direction": "up",
+                "humanized_value": f"{float(row['precipitation_24h'])} mm of Precipitation (24h)"
+            },
+            {
+                "direction": "up",
+                "humanized_value": f"{float(row['wind_gusts_max_overnight'])} km/h Max Wind Gusts"
+            },
+            {
+                "direction": "up",
+                "humanized_value": f"{float(row['temp_min_overnight'])}°C Minimum Temperature Overnight"
             }
-            for name, shap_val, value in top
         ]
 
     return explanations
