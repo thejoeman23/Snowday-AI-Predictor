@@ -68,15 +68,15 @@ def GetExplanations(data, model):
         explanations[i] = [
             {
                 "direction": "up",
-                "humanized_value": f"{float(row['precipitation_24h'])} mm of Precipitation (24h)"
+                "humanized_value": f"{round(float(row['precipitation_24h']), 2)} mm of Precipitation (24h)"
             },
             {
                 "direction": "up",
-                "humanized_value": f"{float(row['wind_gusts_max_overnight'])} km/h Max Wind Gusts"
+                "humanized_value": f"{round(float(row['wind_gusts_max_overnight']), 2)} km/h Max Wind Gusts"
             },
             {
                 "direction": "up",
-                "humanized_value": f"{float(row['temp_min_overnight'])}°C Minimum Temperature Overnight"
+                "humanized_value": f"{round(float(row['temp_min_overnight']), 2)}°C Minimum Temperature Overnight"
             }
         ]
 
