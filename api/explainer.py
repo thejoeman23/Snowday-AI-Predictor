@@ -72,11 +72,11 @@ def GetExplanations(data, model):
             },
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['wind_gusts_max_overnight']))} km/h Max Wind Gusts"
+                "humanized_value": f"{round(float(row['wind_gusts_max_overnight']))} km/h Wind Gusts"
             },
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['temp_min_overnight']))}°C Minimum Temperature Overnight"
+                "humanized_value": f"{round(float(row['temp_min_overnight']))}°C Min Temp Overnight"
             }
         ]
 
