@@ -418,7 +418,7 @@ button.addEventListener("click", async () => {
   button.disabled = false;
 });
 
-const dropdownButton = document.querySelector(".dropdown-button");
-dropdownButton.addEventListener("click", () => {
-  dropdownButton.classList.add("pressed");
-});
+// const dropdownButton = document.querySelector(".dropdown-button");
+// dropdownButton.addEventListener("click", () => {
+//   dropdownButton.classList.add("pressed");
+// });
