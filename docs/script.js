@@ -1,6 +1,7 @@
 const predictApi = "https://snowday-ai-predictor.fly.dev/predict";
 const counterApi = "https://snowday-ai-predictor.fly.dev/count";
 const explainerApi = "https://snowday-ai-predictor.fly.dev/explain";
+const alertApi = "https://snowday-ai-predictor.fly.dev/alert";
 const locationApi = "https://geocoding-api.open-meteo.com/v1/search?";
 
 /* -------------------------
@@ -18,7 +19,8 @@ const loadingState = {
 let pendingData = {
   predictions: null,
   explanations: null,
-  counter: null
+  counter: null,
+  alert: null
 };
 
 function showLoadingScreen(isVisible) {
@@ -39,6 +41,7 @@ function hydrateUI() {
   updateProbabilities(pendingData.predictions);
   updateExplainer(pendingData.explanations);
   updateOthers(pendingData.counter);
+  updateAlerts(pendingData.alert);
   updateURL();
 }
 
@@ -68,10 +71,16 @@ function clearCache() {
   localStorage.removeItem("snowday_predictions");
   localStorage.removeItem("prediction_explanations");
   localStorage.removeItem("counter_value");
+  localStorage.removeItem("alert_data");
 }
 
 const cachedPredictions = (() => {
   const v = localStorage.getItem("snowday_predictions");
+  return v && v !== "null" ? v : null;
+})();
+
+const cachedAlert = (() => {
+  const v = localStorage.getItem("alert_data");
   return v && v !== "null" ? v : null;
 })();
 
@@ -307,6 +316,16 @@ if (cachedCounter !== null) {
   }
 }
 
+if (cachedAlert !== null) {
+  try {
+    const alertData = JSON.parse(cachedAlert);
+    const tomorrowEl = document.querySelector(".tommorow_odometer .odometer");
+    if (tomorrowEl && typeof alertData.odds === "number") {
+      updateOdometer(tomorrowEl, roundTo5(Number(alertData.odds)));
+    }
+  } catch {}
+}
+
 if (hadAnyCache) {
   checkLoadingComplete(); // immediate render from cache
 }
@@ -346,6 +365,20 @@ if (cachedLocationData) {
       pendingData.counter = num;
       loadingState.counter = true;
       checkLoadingComplete();
+    });
+
+  fetch(alertApi + `?lat=${lat}&lon=${lon}`)
+    .then(r => r.json())
+    .then(data => {
+      localStorage.setItem("alert_data", JSON.stringify(data));
+
+      const tomorrowEl = document.querySelector(".tommorow_odometer .odometer");
+      if (tomorrowEl && typeof data.odds === "number") {
+        updateOdometer(tomorrowEl, roundTo5(Number(data.odds)));
+      }
+    })
+    .catch(() => {
+      // Alert data is optional and should not block UI
     });
 }
 
