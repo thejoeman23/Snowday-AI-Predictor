@@ -55,15 +55,15 @@ with open(MODEL_PATH, "rb") as f:
 
 ALERT_PERCENTAGE_BUCKET = {
     "Special Weather Statement": 70,
-    "Fog Advisory": 85,
+    "Fog Advisory": 90,
     "Extreme Cold Warning": 75,
-    "Freezing Drizzle Advisory": 99,
+    "Freezing Drizzle Advisory": 90,
     "Freezing Rain Warning": 99,
     "Arctic Outflow Warning": 75,
     "Snowfall Warning": 80,
     "Blowing Snow Advisory": 90,
     "Winter Storm Watch": 99,
-    "Snow Squall Warning": 80,
+    "Snow Squall Warning": 90,
 }
 
 @app.get("/predict")

@@ -340,6 +340,12 @@ body.sandstorm-active {
   margin-top: -15px;
 }
 
+.reasons.is-hidden {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
 .reason {
   display: flex;
   align-items: center;
@@ -367,7 +373,7 @@ body.sandstorm-active {
 }
 
 /* trigger animation */
-.reasons.is-visible .reason {
+.reasons.animate .reason {
   animation: reason-pop 1s cubic-bezier(0.2, 0.9, 0.2, 1) both;
   animation-delay: calc(var(--i, 0) * 90ms);
 }

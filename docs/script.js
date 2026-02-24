@@ -249,6 +249,13 @@ function updateURL() {
 }
 
 function updateProbabilities(list) {
+  if (cachedAlert !== null) {
+    try {
+      const alertData = JSON.parse(cachedAlert);
+      list[0].snow_day_probability = alertData.odds;
+    } catch {}
+  } 
+
   const current = document.querySelector(".odometer");
   const label = document.querySelector(".current-label");
 
@@ -272,17 +279,30 @@ function updateOthers(value) {
 }
 
 function updateExplainer(list) {
+  if (cachedAlert !== null) updateAlertUI();
+
   const els = document.querySelectorAll(".reason");
   list.forEach((r, i) => els[i].textContent = r.reason);
   popReasons();
 }
 
+function updateAlertUI() {
+  const alertContainer = document.querySelector("#alert");
+  alertContainer.classList.remove("is-hidden");
+
+  const alertReasonEl = alertContainer.querySelector(".reason.warning");
+  const alertData = JSON.parse(cachedAlert);
+
+  alertReasonEl.textContent = String(alertData.alert);
+}
+
 function popReasons() {
   const container = document.querySelector(".reasons");
-  container.classList.remove("is-visible");
+  container.classList.remove("animate");
   void container.offsetWidth;
-  container.classList.add("is-visible");
+  container.classList.add("animate");
 }
+
 
 /* ------------------------- 
     APPLY CACHED UI 
@@ -313,16 +333,6 @@ if (cachedCounter !== null) {
     loadingState.counter = true;
     hadAnyCache = true;
   }
-}
-
-if (cachedAlert !== null) {
-  try {
-    const alertData = JSON.parse(cachedAlert);
-    const tomorrowEl = document.querySelector(".tommorow_odometer .odometer");
-    if (tomorrowEl && typeof alertData.odds === "number") {
-      updateOdometer(tomorrowEl, roundTo5(Number(alertData.odds)));
-    }
-  } catch {}
 }
 
 if (hadAnyCache) {
@@ -416,8 +426,3 @@ button.addEventListener("click", async () => {
 
   button.disabled = false;
 });
-
-// const dropdownButton = document.querySelector(".dropdown-button");
-// dropdownButton.addEventListener("click", () => {
-//   dropdownButton.classList.add("pressed");
-// });
