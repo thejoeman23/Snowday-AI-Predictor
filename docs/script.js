@@ -381,10 +381,7 @@ if (cachedLocationData) {
     .then(data => {
       localStorage.setItem("alert_data", JSON.stringify(data));
 
-      const tomorrowEl = document.querySelector(".tommorow_odometer .odometer");
-      if (tomorrowEl && typeof data.odds === "number") {
-        updateOdometer(tomorrowEl, roundTo5(Number(data.odds)));
-      }
+      hydrateUI(); // Immediate update for alert data since it's more time-sensitive and can change independently of the other data
     })
     .catch(() => {
       // Alert data is optional and should not block UI
