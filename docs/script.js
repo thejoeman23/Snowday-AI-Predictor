@@ -41,7 +41,6 @@ function hydrateUI() {
   updateProbabilities(pendingData.predictions);
   updateExplainer(pendingData.explanations);
   updateOthers(pendingData.counter);
-  updateAlerts(pendingData.alert);
   updateURL();
 }
 
