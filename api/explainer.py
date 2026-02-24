@@ -68,7 +68,7 @@ def GetExplanations(data, model):
         explanations[i] = [
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['precipitation_24h']))} mm of Precipitation"
+                "humanized_value": f"{round(float(row['precipitation_24h']))} cm of Precipitation",
             },
             {
                 "direction": "up",
