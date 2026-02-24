@@ -20,7 +20,6 @@ let pendingData = {
   predictions: null,
   explanations: null,
   counter: null,
-  alert: null
 };
 
 function showLoadingScreen(isVisible) {
@@ -78,7 +77,7 @@ const cachedPredictions = (() => {
   return v && v !== "null" ? v : null;
 })();
 
-const cachedAlert = (() => {
+let cachedAlert = (() => {
   const v = localStorage.getItem("alert_data");
   return v && v !== "null" ? v : null;
 })();
@@ -380,8 +379,9 @@ if (cachedLocationData) {
     .then(r => r.json())
     .then(data => {
       localStorage.setItem("alert_data", JSON.stringify(data));
-
-      hydrateUI(); // Immediate update for alert data since it's more time-sensitive and can change independently of the other data
+      
+      cachedAlert = localStorage.getItem("alert_data");
+      hydrateUI(); // Immediate update since alert can be fetched faster than main data and is more important to show ASAP
     })
     .catch(() => {
       // Alert data is optional and should not block UI
