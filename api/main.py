@@ -61,7 +61,7 @@ ALERT_PERCENTAGE_BUCKET = {
     "Freezing Rain Warning": 99,
     "Arctic Outflow Warning": 75,
     "Snowfall Warning": 80,
-    "Blowing Snow Advisory": 90,
+    "Blowing Snow Advisory": 80,
     "Winter Storm Watch": 99,
     "Snow Squall Warning": 90,
 }
