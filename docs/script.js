@@ -174,7 +174,7 @@ cityInput.addEventListener("input", () => {
       ghostInput.value = typed + suggestion;
       resizeSearchInput();
     }
-  }, 250);
+  }, 100);
 });
 
 cityInput.addEventListener("keydown", e => {
