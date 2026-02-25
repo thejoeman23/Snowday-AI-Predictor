@@ -1,5 +1,7 @@
 @import "/docs/css/variables.css";
 @import "/docs/css/layout.css";
+@import "/css/variables.css";
+@import "/css/layout.css";
 
 button {
 	background: none;
