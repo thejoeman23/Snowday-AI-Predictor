@@ -250,8 +250,10 @@ function updateURL() {
 function updateProbabilities(list) {
   if (cachedAlert !== null) {
     try {
-      const alertData = JSON.parse(cachedAlert);
-      list[0].snow_day_probability = alertData.percentage;
+      if (lastsUntilTomorrow()) {
+        const alertData = JSON.parse(cachedAlert);
+        list[0].snow_day_probability = alertData.percentage;
+      }
     } catch {}
   } 
 
@@ -320,6 +322,48 @@ function updateAlertUI() {
   } else if (onsetDate) {
     alertTimeEl.textContent = `In effect since ${onsetEST}`;
   }
+}
+
+function lastsUntilTomorrow() {
+  if (!cachedAlert) return false;
+
+  let alertData;
+  try {
+    alertData = JSON.parse(cachedAlert);
+  } catch {
+    return false;
+  }
+
+  if (!alertData.expires) return false;
+
+  const tz = alertData.timezone || "America/Toronto";
+  const expiresDate = new Date(alertData.expires);
+  if (isNaN(expiresDate)) return false;
+
+  const now = new Date();
+
+  // Get "now" in the alert's timezone
+  const nowParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).formatToParts(now);
+
+  const get = type => nowParts.find(p => p.type === type).value;
+
+  // Build 3:00 AM tomorrow in that timezone
+  const tomorrow3am = new Date(
+    `${get("year")}-${get("month")}-${get("day")}T03:00:00`
+  );
+
+  tomorrow3am.setDate(tomorrow3am.getDate() + 1);
+
+  return expiresDate > tomorrow3am;
 }
 
 function popReasons() {
