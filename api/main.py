@@ -54,7 +54,7 @@ with open(MODEL_PATH, "rb") as f:
 # ───────────────────────────────────────────────────────────────
 
 ALERT_PERCENTAGE_BUCKET = {
-    "Special Weather Statement": 70,
+    "Special Weather Statement": 0,
     "Fog Advisory": 90,
     "Extreme Cold Warning": 75,
     "Freezing Drizzle Advisory": 90,
@@ -93,28 +93,11 @@ async def predictions(lat: float, lon: float):
 @app.get("/alert")
 async def alert(lat: float, lon: float):
     main_alert = get_alert(lat, lon)
-    alert_odds = ALERT_PERCENTAGE_BUCKET[main_alert]
 
     print(main_alert)
 
-    return {"alert": main_alert, "odds": alert_odds}
-
-def get_alert(lat, lon):
-    alerts = get_alerts_for_coords(lat, lon)
-
-    max_alert_name = ""
-    max_alert_value = 0
-    for alert in alerts:
-        alert_name = alert["type"]
-        alert_value = ALERT_PERCENTAGE_BUCKET[alert_name]
-        print(alert_name)
-
-        if alert_value > max_alert_value:
-            max_alert_name = alert_name
-            max_alert_value = alert_value
-
-    return max_alert_name
-
+    main_alert["polygons"] = None
+    return main_alert
 
 @app.get("/explain")
 async def explain(lat: float, lon: float):
@@ -168,6 +151,23 @@ async def update_counter():
 # Helpers
 # ───────────────────────────────────────────────────────────────
 
+
+def get_alert(lat, lon):
+    alerts = get_alerts_for_coords(lat, lon)
+
+    max_alert = None
+    max_alert_value = 0
+    for alert in alerts:
+        alert_name = alert["type"]
+        alert_value = ALERT_PERCENTAGE_BUCKET[alert_name]
+        alert["percentage"] = alert_value
+        print(alert_name)
+
+        if alert_value > max_alert_value:
+            max_alert = alert
+            max_alert_value = alert_value
+
+    return max_alert
 
 def describe_day(target_date):
     now = datetime.now(ZoneInfo("America/Toronto"))
