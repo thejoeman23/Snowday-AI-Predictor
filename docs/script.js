@@ -251,7 +251,7 @@ function updateProbabilities(list) {
   if (cachedAlert !== null) {
     try {
       const alertData = JSON.parse(cachedAlert);
-      list[0].snow_day_probability = alertData.odds;
+      list[0].snow_day_probability = alertData.probability;
     } catch {}
   } 
 
@@ -289,10 +289,30 @@ function updateAlertUI() {
   const alertContainer = document.querySelector("#alert");
   alertContainer.classList.remove("is-hidden");
 
-  const alertReasonEl = alertContainer.querySelector(".reason.warning");
+  const alertReasonEl = alertContainer.querySelector(".warning-label");
   const alertData = JSON.parse(cachedAlert);
 
-  alertReasonEl.textContent = String(alertData.alert);
+  alertReasonEl.textContent = String(alertData.severity) + " " + String(alertData.type);
+
+  // const onsetDate = new Date(alert.onset);
+  // const expiresDate = new Date(alert.expires);
+
+  // // Create a formatter for EST (America/Toronto)
+  // const estFormatter = new Intl.DateTimeFormat("en-US", {
+  //     timeZone: "America/Toronto",
+  //     month: "short",
+  //     day: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     hour12: false
+  // });
+
+  // // Format the dates
+  // const onsetEST = estFormatter.format(onsetDate);
+  // const expiresEST = estFormatter.format(expiresDate);
+
+  // alertTimeEl = alertContainer.querySelector(".warning-time");
+  // alertTimeEl.textContent = `In effect from ${onsetEST} to ${expiresEST}`;
 }
 
 function popReasons() {
