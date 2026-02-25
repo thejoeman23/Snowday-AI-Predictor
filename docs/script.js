@@ -251,7 +251,7 @@ function updateProbabilities(list) {
   if (cachedAlert !== null) {
     try {
       const alertData = JSON.parse(cachedAlert);
-      list[0].snow_day_probability = alertData.probability;
+      list[0].snow_day_probability = alertData.percentage;
     } catch {}
   } 
 
@@ -294,25 +294,32 @@ function updateAlertUI() {
 
   alertReasonEl.textContent = String(alertData.severity) + " " + String(alertData.type);
 
-  // const onsetDate = new Date(alert.onset);
-  // const expiresDate = new Date(alert.expires);
+  const onsetDate = alertData.onset ? new Date(alertData.onset) : null;
+  const expiresDate = alertData.expires ? new Date(alertData.expires) : null;
 
-  // // Create a formatter for EST (America/Toronto)
-  // const estFormatter = new Intl.DateTimeFormat("en-US", {
-  //     timeZone: "America/Toronto",
-  //     month: "short",
-  //     day: "numeric",
-  //     hour: "2-digit",
-  //     minute: "2-digit",
-  //     hour12: false
-  // });
+  // Create a formatter for EST (America/Toronto)
+  const estFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: alertData.timezone,
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+  });
 
-  // // Format the dates
-  // const onsetEST = estFormatter.format(onsetDate);
-  // const expiresEST = estFormatter.format(expiresDate);
+  // Format the dates
+  const onsetEST = estFormatter.format(onsetDate);
+  const expiresEST = estFormatter.format(expiresDate);
 
-  // alertTimeEl = alertContainer.querySelector(".warning-time");
-  // alertTimeEl.textContent = `In effect from ${onsetEST} to ${expiresEST}`;
+  alertTimeEl = alertContainer.querySelector(".warning-time");
+
+  if (onsetDate && expiresDate) {
+    alertTimeEl.textContent = `In effect from ${onsetEST} to ${expiresEST}`;
+  } else if (expiresDate) {
+    alertTimeEl.textContent = `In effect until ${expiresEST}`;
+  } else if (onsetDate) {
+    alertTimeEl.textContent = `In effect since ${onsetEST}`;
+  }
 }
 
 function popReasons() {
