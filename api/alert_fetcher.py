@@ -123,7 +123,7 @@ def _parse_alert_cap(alert_url, seen_types):
 
 def _get_all_alerts():
     tz = ZoneInfo("America/Toronto")
-    date = datetime.now(tz).strftime("%Y%m%d")
+    date = datetime.now(timezone.utc).strftime("%Y%m%d")
     base = f"https://dd.weather.gc.ca/{date}/WXO-DD/alerts/cap/{date}/"
 
     office_dirs = _get_office_dirs(base)

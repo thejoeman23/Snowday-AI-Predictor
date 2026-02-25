@@ -378,6 +378,15 @@ body.sandstorm-active {
   animation-delay: calc(var(--i, 0) * 90ms);
 }
 
+a[href] {
+  color: var(--accent-pink);
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: 1000;
+}
+
 .reason.warning {
   width: 100%;
 
