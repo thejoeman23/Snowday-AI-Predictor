@@ -1,4 +1,6 @@
 import requests
+from annotated_types import Timezone
+from zoneinfo import ZoneInfo
 from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -15,7 +17,7 @@ ALERT_NAMES_BUCKET = {
     "snowfall": "Snowfall Warning",
     "blowing snow": "Blowing Snow Advisory",
     "winter storm": "Winter Storm Watch",
-    "snow squall": "Snow Squall Warning",
+    "snow squall": "Snow Squall Warning"
 }
 
 
@@ -120,10 +122,12 @@ def _parse_alert_cap(alert_url, seen_types):
 
 
 def _get_all_alerts():
-    date = datetime.now(timezone.utc).strftime("%Y%m%d")
+    tz = ZoneInfo("America/Toronto")
+    date = datetime.now(tz).strftime("%Y%m%d")
     base = f"https://dd.weather.gc.ca/{date}/WXO-DD/alerts/cap/{date}/"
 
     office_dirs = _get_office_dirs(base)
+    office_dirs = { (base + "CWTO/")}
     all_alerts = []
 
     for office_dir in office_dirs:

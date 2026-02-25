@@ -95,6 +95,8 @@ async def alert(lat: float, lon: float):
     main_alert = get_alert(lat, lon)
     alert_odds = ALERT_PERCENTAGE_BUCKET[main_alert]
 
+    print(main_alert)
+
     return {"alert": main_alert, "odds": alert_odds}
 
 def get_alert(lat, lon):
@@ -105,6 +107,7 @@ def get_alert(lat, lon):
     for alert in alerts:
         alert_name = alert["type"]
         alert_value = ALERT_PERCENTAGE_BUCKET[alert_name]
+        print(alert_name)
 
         if alert_value > max_alert_value:
             max_alert_name = alert_name
