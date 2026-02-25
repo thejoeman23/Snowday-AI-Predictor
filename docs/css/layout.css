@@ -1,0 +1,53 @@
+/* GLOBAL RESET + SAFE AREA FIX */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #2c2929;
+  overscroll-behavior-y: none;
+  font-family: "Inter", system-ui, sans-serif;
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  height: auto;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--bg)
+}
+
+/* PAGE LAYOUT */
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(32px, 6vw, 60px);
+
+  flex: 1;
+
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-top: 50px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.flex {
+    display: flex;
+}
+
+.center-children {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
