@@ -574,7 +574,7 @@ strong {
   font-size: clamp(8px, 2.5vw, 14px);
   font-weight: 400;
   color: var(--text-muted);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.10em;
 }
 
 .upcoming-updates-content {
