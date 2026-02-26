@@ -280,7 +280,7 @@ function updateOthers(value) {
 }
 
 function updateExplainer(list) {
-  if (cachedAlert !== null) updateAlertUI();
+  if (cachedAlert !== null && lastsUntilTomorrow()) updateAlertUI(); 
 
   const els = document.querySelectorAll(".reason");
   list.forEach((r, i) => els[i].textContent = r.reason);
@@ -309,9 +309,19 @@ function updateAlertUI() {
       hour12: true
   });
 
+  // Build 3:00 AM tomorrow in that timezone
+  let now = new Date();
+  now = estFormatter.format(now);
+
   // Format the dates
   const onsetEST = estFormatter.format(onsetDate);
   const expiresEST = estFormatter.format(expiresDate);
+
+  if (now > expiresEST) {
+    localStorage.removeItem("alert_data");
+    alertContainer.classList.add("is-hidden");
+    return;
+  }
 
   alertTimeEl = alertContainer.querySelector(".warning-time");
 
