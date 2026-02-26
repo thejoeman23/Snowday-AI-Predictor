@@ -568,6 +568,15 @@ strong {
   margin-top: -5px;
 }
 
+.upcoming-updates-label.has-time::after {
+  margin-left: 8px;
+  content: "Last updated Feb 26, 2026";
+  font-size: clamp(8px, 2.5vw, 14px);
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.18em;
+}
+
 .upcoming-updates-content {
   font-size: clamp(var(--fs-others-label-min), 2.5vw, var(--fs-others-label-max));
   font-weight: 400;
