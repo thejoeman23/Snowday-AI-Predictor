@@ -84,7 +84,7 @@ async def predictions(lat: float, lon: float):
 
         results.append({
             "weekday": weekday,
-            "snow_day_probability": odds if round(row["precipitation_24h"]) > 0 or row["snowfall_last_12h"] > 10 else 0
+            "snow_day_probability": odds
         })
         print(results[0])
 
