@@ -80,7 +80,7 @@ async def predictions(lat: float, lon: float):
     results = []
     for i, row in data.iterrows():
         weekday = describe_day(row["date"])
-        odds = float(round(row["snow_day_probability"] * 100))
+        odds = float(row["snow_day_probability"] * 100)
 
         results.append({
             "weekday": weekday,
