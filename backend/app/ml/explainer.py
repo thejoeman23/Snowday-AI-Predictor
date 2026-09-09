@@ -61,15 +61,15 @@ def get_explanations(data, model):
         explanations[i] = [
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['precipitation_24h']))} cm of Precipitation",
+                "humanized_value": f"{round(float(row['precipitation_4_9am']))} mm of Precipitation",
             },
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['wind_gusts_max_overnight']))} km/h Wind Gusts"
+                "humanized_value": f"{round(float(row['wind_gusts_4_9am_max']))} km/h Wind Gusts"
             },
             {
                 "direction": "up",
-                "humanized_value": f"{round(float(row['temp_min_overnight']))}°C Min Temp Overnight"
+                "humanized_value": f"{round(float(row['temp_min']))}°C Daily Min Temp"
             }
         ]
 
@@ -103,33 +103,12 @@ FEATURE_BUCKETS = {
         (15, "Heavy Snowfall"),
         (999, "Extreme Snowfall"),
     ],
-    "snowfall_overnight": [
-        (0, "No Overnight Snowfall"),
-        (2, "Light Overnight Snowfall"),
-        (7, "Moderate Overnight Snowfall"),
-        (15, "Heavy Overnight Snowfall"),
-        (999, "Extreme Overnight Snowfall"),
-    ],
-    "snowfall_24h": [
-        (0, "No Snowfall (Daily Total)"),
-        (5, "Light Snowfall (Daily Total)"),
-        (15, "Moderate Snowfall (Daily Total)"),
-        (30, "Heavy Snowfall (Daily Total)"),
-        (999, "Extreme Snowfall (Daily Total)"),
-    ],
-    "snowfall_last_24h": [
-        (0, "No Snowfall (past 24h)"),
-        (5, "Light Snowfall (past 24h)"),
-        (15, "Moderate Snowfall (past 24h)"),
-        (30, "Heavy Snowfall (past 24h)"),
-        (999, "Extreme Snowfall (past 24h)"),
-    ],
-    "snowfall_last_12h": [
-        (0, "No Snowfall (past 12h)"),
-        (5, "Light Snowfall (past 12h)"),
-        (15, "Moderate Snowfall (past 12h)"),
-        (30, "Heavy Snowfall (past 12h)"),
-        (999, "Extreme Snowfall (past 12h)"),
+    "snowfall_4_9am": [
+        (0, "No Snowfall from 4-9am"),
+        (2, "Light Snowfall from 4-9am"),
+        (7, "Moderate Snowfall from 4-9am"),
+        (15, "Heavy Snowfall from 4-9am"),
+        (999, "Extreme Snowfall from 4-9am"),
     ],
 
     # ❄️ Blowing Snow Risk (cm)
@@ -145,17 +124,11 @@ FEATURE_BUCKETS = {
         (8, "Moderate Precipitation"),
         (999, "Heavy Precipitation"),
     ],
-    "precipitation_overnight": [
-        (0, "No Overnight Precipitation"),
-        (2, "Light Overnight Precipitation"),
-        (8, "Moderate Overnight Precipitation"),
-        (999, "Heavy Overnight Precipitation"),
-    ],
-    "precipitation_24h": [
-        (0, "No Precipitation (24h)"),
-        (5, "Light Precipitation (24h)"),
-        (15, "Moderate Precipitation (24h)"),
-        (999, "Heavy Precipitation (24h)"),
+    "precipitation_4_9am": [
+        (0, "No Precipitation from 4-9am"),
+        (2, "Light Precipitation from 4-9am"),
+        (8, "Moderate Precipitation from 4-9am"),
+        (999, "Heavy Precipitation from 4-9am"),
     ],
 
     # 🌡 Temperature (°C)
@@ -166,12 +139,26 @@ FEATURE_BUCKETS = {
         (-2, "Near Freezing Temperatures"),
         (999, "Above Freezing Temperatures"),
     ],
-    "temp_min_overnight": [
-        (-25, "Extreme Overnight Cold"),
-        (-15, "Very Cold Overnight Temperatures"),
-        (-8, "Cold Overnight Temperatures"),
-        (-2, "Near Freezing Overnight Temperatures"),
-        (999, "Mild Overnight Temperatures"),
+    "temperature_4_9am_min": [
+        (-25, "Extreme 4-9am Cold"),
+        (-15, "Very Cold 4-9am Temperatures"),
+        (-8, "Cold 4-9am Temperatures"),
+        (-2, "Near Freezing 4-9am Temperatures"),
+        (999, "Mild 4-9am Temperatures"),
+    ],
+    "temperature_4_9am_avg": [
+        (-25, "Extreme 4-9am Cold"),
+        (-15, "Very Cold 4-9am Temperatures"),
+        (-8, "Cold 4-9am Temperatures"),
+        (-2, "Near Freezing 4-9am Temperatures"),
+        (999, "Mild 4-9am Temperatures"),
+    ],
+    "temp_min": [
+        (-25, "Extreme Daily Cold"),
+        (-15, "Very Cold Daily Temperatures"),
+        (-8, "Cold Daily Temperatures"),
+        (-2, "Near Freezing Daily Temperatures"),
+        (999, "Mild Daily Temperatures"),
     ],
 
     # 💨 Wind speed (km/h)
@@ -182,12 +169,12 @@ FEATURE_BUCKETS = {
         (60, "Very Strong Wind Speeds"),
         (999, "Extreme Wind Speeds"),
     ],
-    "wind_speed_avg_overnight": [
-        (10, "Calm Overnight Winds"),
-        (25, "Breezy Overnight Winds"),
-        (40, "Strong Overnight Winds"),
-        (60, "Very Strong Overnight Winds"),
-        (999, "Extreme Overnight Winds"),
+    "wind_speed_4_9am_avg": [
+        (10, "Calm 4-9am Winds"),
+        (25, "Breezy 4-9am Winds"),
+        (40, "Strong 4-9am Winds"),
+        (60, "Very Strong 4-9am Winds"),
+        (999, "Extreme 4-9am Winds"),
     ],
 
     # 🌬 Wind gusts (km/h)
@@ -197,19 +184,25 @@ FEATURE_BUCKETS = {
         (70, "Severe Wind Gusts"),
         (999, "Extreme Wind Gusts"),
     ],
-    "wind_gusts_max_overnight": [
-        (20, "Light Overnight Wind Gusts"),
-        (40, "Strong Overnight Wind Gusts"),
-        (70, "Severe Overnight Wind Gusts"),
-        (999, "Extreme Overnight Wind Gusts"),
+    "wind_gusts_4_9am_max": [
+        (20, "Light 4-9am Wind Gusts"),
+        (40, "Strong 4-9am Wind Gusts"),
+        (70, "Severe 4-9am Wind Gusts"),
+        (999, "Extreme 4-9am Wind Gusts"),
+    ],
+    "daily_wind_gusts_max": [
+        (20, "Light Daily Wind Gusts"),
+        (40, "Strong Daily Wind Gusts"),
+        (70, "Severe Daily Wind Gusts"),
+        (999, "Extreme Daily Wind Gusts"),
     ],
 
     # ❄️ Dew point (°C)
-    "dewpoint_avg_overnight": [
-        (-15, "Extremely Dry Overnight Air"),
-        (-5, "Dry Overnight Air"),
+    "dewpoint_4_9am_avg": [
+        (-15, "Extremely Dry 4-9am Air"),
+        (-5, "Dry 4-9am Air"),
         (0, "Near Freezing Dew Point"),
-        (999, "Moist Overnight Air"),
+        (999, "Moist 4-9am Air"),
     ],
 
     # 🧊 Freezing rain (boolean)
@@ -219,21 +212,15 @@ FEATURE_BUCKETS = {
     ],
 
     # 🌥 Weather codes
-    "weather_code": [
-        (66, "Freezing Rain"),
-        (67, "Heavy Freezing Rain"),
-        (71, "Snowfall"),
-        (73, "Heavy Snowfall"),
-        (75, "Extreme Snowfall"),
-        (77, "Snow Grains"),
-        (85, "Snow Showers"),
-        (86, "Heavy Snow Showers"),
+    "snow_weather_code_4_9am": [
+        (0, "No 4-9am Snow Conditions"),
+        (1, "Snow Conditions from 4-9am"),
     ],
 
     # ⚠️ Model flags
-    "no_snowfall_penalty": [
+    "no_snowfall_4_9am_penalty": [
         (0, None),
-        (1, "No Snowfall Overnight"),
-        (2, "No Snowfall (24h)"),
+        (1, "Very Little Snowfall from 4-9am"),
+        (2, "No Snowfall from 4-9am"),
     ],
 }
